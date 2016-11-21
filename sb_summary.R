@@ -11,17 +11,19 @@ sb <- melt(sb, id.vars = c('Date','Batch', 'Location', 'Region', 'Gear', 'Sex',
                            'Stage', 'Transmitter'),
            measure.vars = c('TL', 'FL', 'Weight'))
 
-# data_lab <- c(
-#   'TL' = 'Total Length (cm)',
-#   'FL' = 'Fork Length (cm)',
-#   'Weight' = 'Weight (kg)'
-# )
-#
-# ggplot() + geom_boxplot(data = sb, aes(x = Sex, y = value)) +
-#   facet_wrap(~ variable, scales = 'free',
-#              labeller = labeller(variable = data_lab)) +
-#   labs(y = 'Value')
+data_lab <- c(
+  'TL' = 'Total Length (cm)',
+  'FL' = 'Fork Length (cm)',
+  'Weight' = 'Weight (kg)'
+)
 
+ggplot() + geom_boxplot(data = filter(sb, variable %in% c('TL', 'Weight')),
+                        aes(x = Region, y = value, color = Sex)) +
+  facet_wrap(~ variable, scales = 'free',
+             labeller = labeller(variable = data_lab)) +
+  labs(x = 'Spawning Region', y = 'Value')
+
+## Join detections
 detects <- vemsort('p:/obrien/biotelemetry/hudson sb/receiver logs')
 detects <- filter(detects, transmitter %in%
                     paste0('A69-1303-', seq(11423, 11522, 1)))
