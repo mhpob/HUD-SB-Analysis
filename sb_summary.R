@@ -5,12 +5,11 @@ sb <- read.csv('p:/obrien/biotelemetry/hudson sb/sb sonic tags 2016.csv',
                na.strings = 'n/a', stringsAsFactors = F)
 sb <- mutate(sb, TL = TL/100,
              FL = FL/100,
-             Weight = Weight/1000)
-sb <- melt(sb, id.vars = c('Date','Batch', 'Location', 'Gear', 'Sex', 'Stage',
-                           'Transmitter'),
+             Weight = Weight/1000,
+             Region = ifelse(Location == 'RM 59', 'Lower', 'Upper'))
+sb <- melt(sb, id.vars = c('Date','Batch', 'Location', 'Region', 'Gear', 'Sex',
+                           'Stage', 'Transmitter'),
            measure.vars = c('TL', 'FL', 'Weight'))
-
-
 
 # data_lab <- c(
 #   'TL' = 'Total Length (cm)',
