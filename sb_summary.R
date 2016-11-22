@@ -18,7 +18,7 @@ data_lab <- c(
 )
 
 ggplot() + geom_boxplot(data = filter(sb, variable %in% c('TL', 'Weight')),
-                        aes(x = Region, y = value, color = Sex)) +
+                        aes(x = Region, y = value, fill = Sex)) +
   facet_wrap(~ variable, scales = 'free',
              labeller = labeller(variable = data_lab)) +
   labs(x = 'Spawning Region', y = 'Value')
