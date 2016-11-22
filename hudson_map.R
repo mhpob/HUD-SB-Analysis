@@ -4,12 +4,13 @@ midatl <- readOGR('c:/users/secor/desktop/gis products/chesapeake/midatlantic',
                   'matl_states_land')
 
 plot_points <- read.csv('p:/obrien/biotelemetry/hudson sb/plotting points.csv')
+# plot_points <- plot_points[plot_points$Owner %in% c('UMCES', 'Tag'),]
 
 midatl <- fortify(midatl)
 
 hud_s <- ggplot() + geom_polygon(data = midatl, aes(long, lat, group = group),
                                  fill = 'darkgray') +
-  coord_map(xlim = c(-74.1, -73.8336), ylim = c(40.5980, 41.1545)) +
+  coord_map(xlim = c(-74.1, -73.8336), ylim = c(40.5980, 41.13725)) +
   geom_point(data = plot_points, aes(x = Long, y = Lat,
                                      color = Owner, shape = Owner)) +
   theme_bw() +
@@ -19,7 +20,7 @@ hud_sm <- ggplot() +
            ymin = 41.32, ymax = 41.52, fill = 'blue') +
   geom_polygon(data = midatl, aes(long, lat, group = group),
                fill = 'darkgray') +
-  coord_map(xlim = c(-74.1, -73.8336), ylim = c(41.1545, 41.711)) +
+  coord_map(xlim = c(-74.1, -73.8336), ylim = c(41.13725, 41.67650)) +
   geom_point(data = plot_points, aes(x = Long, y = Lat,
                                      color = Owner, shape = Owner)) +
   theme_bw() +
@@ -29,7 +30,7 @@ hud_nm <- ggplot() +
            ymin = 42.07, ymax = 42.36, fill = 'pink') +
   geom_polygon(data = midatl, aes(long, lat, group = group),
                fill = 'darkgray') +
-  coord_map(xlim = c(-74.0176, -73.7512), ylim = c(41.711, 42.2675)) +
+  coord_map(xlim = c(-74.0664, -73.8), ylim = c(41.67650, 42.21575)) +
   geom_point(data = plot_points, aes(x = Long, y = Lat,
                                      color = Owner, shape = Owner)) +
   theme_bw() +
@@ -39,7 +40,7 @@ hud_n <- ggplot() +
            ymin = 42.07, ymax = 42.36, fill = 'pink') +
   geom_polygon(data = midatl, aes(long, lat, group = group),
                fill = 'darkgray') +
-  coord_map(xlim = c(-73.8338, -73.5674), ylim = c(42.2675, 42.8240)) +
+  coord_map(xlim = c(-73.8914, -73.625), ylim = c(42.21575, 42.75500)) +
   geom_point(data = plot_points, aes(x = Long, y = Lat,
                                      color = Owner, shape = Owner)) +
   theme_bw() +
