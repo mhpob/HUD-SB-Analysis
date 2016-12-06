@@ -18,14 +18,16 @@ data_lab <- c(
 )
 
 ggplot() + geom_boxplot(data = filter(sb, variable %in% c('TL', 'Weight')),
-                        aes(x = Region, y = value, color = Sex)) +
+                        aes(x = Region, y = value, fill = Sex)) +
   facet_wrap(~ variable, scales = 'free',
              labeller = labeller(variable = data_lab)) +
-  labs(x = 'Spawning Region', y = 'Value')
+  labs(x = 'Spawning Region', y = 'Value') +
+  theme_bw()
 
 ## Join detections
 detects <- vemsort('p:/obrien/biotelemetry/hudson sb/receiver logs')
 detects <- filter(detects, transmitter %in%
-                    paste0('A69-1303-', seq(11423, 11522, 1)))
+                    paste0('A69-1303-', seq(11423, 11522, 1)),
+                  date.utc >= ymd('2016-04-20'))
 detects$date.floor <- floor_date(detects$date.local, unit = 'day')
 detects <- left_join(sb, detects, by = c('Transmitter' = 'transmitter'))
