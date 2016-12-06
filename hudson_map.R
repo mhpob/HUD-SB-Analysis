@@ -10,6 +10,7 @@ midatl <- fortify(midatl)
 hud_s <- ggplot() + geom_polygon(data = midatl, aes(long, lat, group = group),
                                  fill = 'darkgray') +
   coord_map(xlim = c(-74.1, -73.8336), ylim = c(40.5980, 41.13725)) +
+  scale_x_continuous(breaks = c(-74.0, -73.9)) +
   geom_point(data = plot_points, aes(x = Long, y = Lat,
                                      shape = Type), size = 3.5) +
   theme_bw() +
@@ -20,6 +21,7 @@ hud_sm <- ggplot() +
   geom_polygon(data = midatl, aes(long, lat, group = group),
                fill = 'darkgray') +
   coord_map(xlim = c(-74.1, -73.8336), ylim = c(41.13725, 41.67650)) +
+  scale_x_continuous(breaks = c(-74.0, -73.9)) +
   geom_point(data = plot_points, aes(x = Long, y = Lat,
                                      shape = Type), size = 3.5) +
   theme_bw() +
@@ -30,6 +32,7 @@ hud_nm <- ggplot() +
   geom_polygon(data = midatl, aes(long, lat, group = group),
                fill = 'darkgray') +
   coord_map(xlim = c(-74.0664, -73.8), ylim = c(41.67650, 42.21575)) +
+  scale_x_continuous(breaks = c(-74.0, -73.9)) +
   geom_point(data = plot_points, aes(x = Long, y = Lat,
                                      shape = Type), size = 3.5) +
   theme_bw() +
