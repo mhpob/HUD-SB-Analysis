@@ -15,7 +15,8 @@ sb <- melt(sb, id.vars = c('Date','Batch', 'Location', 'Region', 'Gear', 'Sex',
 
 detects <- vemsort('p:/obrien/biotelemetry/hudson sb/receiver logs')
 detects <- filter(detects, transmitter %in%
-                    paste0('A69-1303-', seq(11423, 11522, 1)))
+                    paste0('A69-1303-', seq(11423, 11522, 1)),
+                  date.utc >= ymd('2016-04-20'))
 detects$date.floor <- floor_date(detects$date.local, unit = 'day')
 detects <- left_join(sb, detects, by = c('Transmitter' = 'transmitter'))
 
