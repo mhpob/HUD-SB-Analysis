@@ -13,17 +13,19 @@ hud_s <- ggplot() + geom_polygon(data = midatl, aes(long, lat, group = group),
   scale_x_continuous(breaks = c(-74.0, -73.9)) +
   geom_point(data = plot_points, aes(x = Long, y = Lat,
                                      shape = Type), size = 3.5) +
+  scale_shape(solid = F) +
   theme_bw() +
   theme(axis.title = element_blank(), legend.position = 'none')
 hud_sm <- ggplot() +
   annotate('rect', xmin = -74.05, xmax = -73.9,
-           ymin = 41.32, ymax = 41.52, fill = 'blue') +
+           ymin = 41.32, ymax = 41.52, fill = 'lightblue') +
   geom_polygon(data = midatl, aes(long, lat, group = group),
                fill = 'darkgray') +
   coord_map(xlim = c(-74.1, -73.8336), ylim = c(41.13725, 41.67650)) +
   scale_x_continuous(breaks = c(-74.0, -73.9)) +
   geom_point(data = plot_points, aes(x = Long, y = Lat,
                                      shape = Type), size = 3.5) +
+  scale_shape(solid = F) +
   theme_bw() +
   theme(axis.title = element_blank(), legend.position = 'none')
 hud_nm <- ggplot() +
@@ -35,6 +37,7 @@ hud_nm <- ggplot() +
   scale_x_continuous(breaks = c(-74.0, -73.9)) +
   geom_point(data = plot_points, aes(x = Long, y = Lat,
                                      shape = Type), size = 3.5) +
+  scale_shape(solid = F) +
   theme_bw() +
   theme(axis.title = element_blank(), legend.position = 'none')
 hud_n <- ggplot() +
@@ -45,9 +48,10 @@ hud_n <- ggplot() +
   coord_map(xlim = c(-73.8914, -73.625), ylim = c(42.21575, 42.75500)) +
   geom_point(data = plot_points, aes(x = Long, y = Lat,
                                      shape = Type), size = 3.5) +
+  scale_shape(solid = F) +
   theme_bw() +
   theme(axis.title = element_blank(), legend.position = 'none')
 
 library(gridExtra)
-grid.arrange(hud_s, hud_sm, hud_nm, hud_n,
+grid.arrange(hud_n, hud_nm, hud_sm, hud_s,
              nrow = 1, left = 'Latitude', bottom = 'Longitude')
