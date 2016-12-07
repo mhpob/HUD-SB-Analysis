@@ -14,5 +14,8 @@ ggplot() + geom_step(data = agg_detects,
                      lwd = 1) +
   scale_x_datetime(limits = c(ymd_hms('2016-04-19 00:00:00'),
                               ymd_hms('2016-07-05 00:00:00'))) +
-  facet_wrap(~ array, ncol = 1)
+  facet_wrap(~ array, ncol = 1) +
+  theme_bw() +
+  theme(legend.position = c(0.79, 0.94), axis.title.x = element_blank()) +
+  labs(y = 'Proportion detected', color = 'Tagging region')
 
