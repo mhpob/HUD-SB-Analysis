@@ -1,7 +1,7 @@
 sb <- read.csv('p:/obrien/biotelemetry/hudson sb/sb sonic tags 2016.csv',
                na.strings = 'n/a', stringsAsFactors = F)
-sb <- dplyr::mutate(sb, TL = TL/100,
-                    FL = FL/100,
+sb <- dplyr::mutate(sb, TL = TL/10,
+                    FL = FL/10,
                     Weight = Weight/1000,
                     Region = ifelse(Location == 'RM 59',
                                     'West Point-Newburgh',
