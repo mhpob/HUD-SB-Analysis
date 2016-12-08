@@ -31,4 +31,7 @@ ggplot() + geom_raster(data = agg_rkm, aes(x = day, y = trans.num,
   scale_fill_gradient(low = 'blue', high = 'orange') +
   scale_x_datetime(limits = c(ymd_hms('2016-04-19 00:00:00'),
                               ymd_hms('2016-06-19 00:00:00'))) +
-  facet_wrap(~ Region, ncol = 1, scales = 'free_y')
+  facet_wrap(~ Region, ncol = 1, scales = 'free_y')  +
+  theme_bw() +
+  theme(legend.position = c(0.95, 0.2), axis.title.x = element_blank()) +
+  labs(y = 'Fish (Transmitter ID)', fill = 'River km')
