@@ -16,7 +16,7 @@ arrays$array <- factor(arrays$array, ordered = T,
                   levels = c('Above', 'Saugerties-Coxsackie', 'Between',
                              'West Point-Newburgh', 'Below'))
 
-detects <- TelemetryR::vemsort('p:/obrien/biotelemetry/hudson sb/receiver logs')
+detects <- TelemetryR::vemsort('p:/obrien/biotelemetry/hudson sb/detections')
 detects <- dplyr::filter(detects, transmitter %in%
                            paste0('A69-1303-', seq(11423, 11522, 1)),
                          date.utc >= lubridate::ymd('2016-04-20'))
