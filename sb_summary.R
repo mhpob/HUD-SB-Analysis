@@ -17,7 +17,8 @@ ggplot() + geom_boxplot(data = plot_data,
              labeller = labeller(variable = data_lab)) +
   scale_fill_brewer(palette = "Dark2", direction = -1) +
   labs(x = 'Spawning Region', y = 'Value') +
-  theme_bw()
+  theme_bw() +
+  theme(legend.position = c(0.9, 0.9))
 
 # Summary Data
 summary <- detects %>%
@@ -33,3 +34,12 @@ didnt_leave <- detects %>%
   group_by(Region) %>%
   summarize(n = 50-n())
 
+sex <- detects %>%
+  distinct(Transmitter, .keep_all = T) %>%
+  group_by(Region, Sex) %>%
+  summarize(n = n())
+
+WN2SC <- detects %>%
+  filter(grepl('West', Region),
+         grepl('Sau', array)) %>%
+  distinct(Transmitter)
