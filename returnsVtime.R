@@ -1,6 +1,6 @@
 library(lubridate); library(ggplot2); library(dplyr)
 
-source('detection_input.R')
+detects <- readRDS('hud_detects.RDS')
 
 # Proportion v week
 agg_detects <- filter(detects, !is.na(date.local)) %>%

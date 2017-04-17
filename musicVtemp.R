@@ -2,7 +2,7 @@ library(ggplot2); library(lubridate); library(dplyr)
 
 ## Music
 #  Detection Data
-source('detection_input.R')
+detects <- readRDS('hud_detects.RDS')
 
 #  Plotting
 plot.data <- detects %>%

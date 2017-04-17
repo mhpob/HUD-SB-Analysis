@@ -1,6 +1,6 @@
 library(ggplot2); library(dplyr)
 
-source('detection_input.R')
+detects <- readRDS('hud_detects.RDS')
 
 data_lab <- c(
   'TL' = 'Total Length (cm)',
