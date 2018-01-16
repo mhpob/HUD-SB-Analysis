@@ -10,11 +10,6 @@ sb <- reshape2::melt(sb, id.vars = c('Date','Batch', 'Location', 'Region',
                                      'Gear', 'Sex', 'Stage', 'Transmitter'),
                      measure.vars = c('TL', 'FL', 'Weight'))
 
-arrays <- read.csv('p:/obrien/biotelemetry/hudson sb/receiver arrays.csv',
-                   stringsAsFactors = F)
-arrays$array <- factor(arrays$array, ordered = T,
-                  levels = c('Above', 'Saugerties-Coxsackie', 'Between',
-                             'West Point-Newburgh', 'Below'))
 
 hud_detects <- TelemetryR::vemsort('p:/obrien/biotelemetry/detections')
 hud_detects <- dplyr::filter(hud_detects, transmitter %in%
@@ -24,9 +19,52 @@ hud_detects$date.floor <- lubridate::floor_date(hud_detects$date.local,
                                                 unit = 'day')
 hud_detects <- dplyr::left_join(sb, hud_detects,
                                 by = c('Transmitter' = 'transmitter'))
-hud_detects <- dplyr::left_join(hud_detects, arrays[, c('station', 'array')],
-                                by = 'station')
+
+# Assign arrays
+array_greps <- list(
+  'Above' = 'can|br$|buoy 2\\d\\d',
+  'Saugerties-Coxsackie' = 'd buoy (7\\d|1[25]\\d)',
+  'Between' = 'rogers',
+  'West Point-Newburgh' = 'd buoy (27|[4-5]\\d)|king',
+  'Below' = 'd buoy *(7|[1-2][0-6])( |$)',
+  'ME' = '^\\d',
+  'MA' = 'merri|taun',
+  'Long Isl' = 'east r|ltb|[ny] [ew]|matti|e\\.c|junc|ique',
+  'NJ Coast' = 'opt',
+  'MD Coast' = '([at]|cs)-|inner|outer|middle|[iao][nms]\\d',
+  'DE Coast' = 'BOEM',
+  'Ches' = 'kent|SERC'
+)
+
+station_list <- lapply(array_greps,
+                       grep, x = unique(hud_detects$station),
+                       ignore.case = T, value = T)
+
+# Test that GREP doesn't match multiple arrays
+grep_check <- sapply(1:length(station_list),
+                     function(n) intersect(station_list[[n]],
+                                           unlist(station_list[-n])))
+if(length(unlist(grep_check)) != 0){
+  names(grep_check) <- names(station_list)
+  print(unlist(grep_check))
+  stop('Regex matches multiple stations!!')
+}
+
+
+# Designate arrays
+hud_detects$array <- NA
+for(i in seq(1:length(station_list))){
+  hud_detects$array <- ifelse(hud_detects$station %in% station_list[[i]],
+                              names(station_list)[i],
+                              hud_detects$array)
+}
+
+
+# Missing array info test
+if(dim(dplyr::filter(hud_detects, is.na(array)))[1] > 1){
+  stop('UNID array found!')
+}
 
 saveRDS(hud_detects, file = 'hud_detects.RDS')
 
-rm(sb, arrays)
+rm(sb, array_greps, station_list, grep_check, i)
