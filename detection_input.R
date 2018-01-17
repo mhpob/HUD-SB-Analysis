@@ -28,12 +28,12 @@ array_greps <- list(
   'West Point-Newburgh' = 'd buoy (27|[4-5]\\d)|king',
   'Below' = 'd buoy *(7|[1-2][0-6])( |$)',
   'ME' = '^\\d',
-  'MA' = 'merri|taun',
-  'Long Isl' = 'east r|ltb|[ny] [ew]|matti|e\\.c|junc|ique',
+  'MA' = 'merri|taun|RI$',
+  'Long Isl' = 'east r|ltb|[ny] [ew]|matti|e\\.c|junc|ique|thames',
   'NJ Coast' = 'opt',
   'MD Coast' = '([at]|cs)-|inner|outer|middle|[iao][nms]\\d',
   'DE Coast' = 'BOEM',
-  'Ches' = 'kent|SERC'
+  'Ches' = 'kent'
 )
 
 station_list <- lapply(array_greps,
