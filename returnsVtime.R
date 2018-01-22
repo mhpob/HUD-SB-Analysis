@@ -3,18 +3,25 @@ library(lubridate); library(ggplot2); library(dplyr)
 detects <- readRDS('hud_detects.RDS')
 
 # Proportion v week
-agg_detects <- filter(detects, !is.na(date.local)) %>%
-  mutate(week = ceiling_date(date.local, unit = 'week')) %>%
-  group_by(week, Region, array) %>%
-  distinct(trans.num) %>%
+agg_detects <- filter(detects,
+                      array %in% c('Above', 'Saugerties-Coxsackie', 'Between',
+                                   'West Point-Newburgh', 'Below'),
+                      date.local >= '2017-04-01',
+                      date.local <= '2017-07-15') %>%
+  mutate(week = ceiling_date(date.local, unit = 'week'),
+         arr.fac  = factor(array,
+                           levels = c('Above', 'Saugerties-Coxsackie', 'Between',
+                                      'West Point-Newburgh', 'Below'))) %>%
+  group_by(week, Region, arr.fac) %>%
+  distinct(Transmitter) %>%
   summarize(count = n())
 
 ggplot() + geom_step(data = agg_detects,
                      aes(x = week, y = count/50, color = Region),
                      lwd = 1) +
-  scale_x_datetime(limits = c(ymd_hms('2016-04-19 00:00:00'),
-                              ymd_hms('2016-07-05 00:00:00'))) +
-  facet_wrap(~ array, ncol = 1) +
+  # scale_x_datetime(limits = c(ymd_hms('2016-04-19 00:00:00'),
+                              # ymd_hms('2016-07-05 00:00:00'))) +
+  facet_wrap(~ arr.fac, ncol = 1) +
   theme_bw() +
   theme(legend.position = c(0.79, 0.94), axis.title.x = element_blank()) +
   labs(y = 'Proportion detected', color = 'Tagging region')
