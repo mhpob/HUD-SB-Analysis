@@ -23,10 +23,10 @@ hud_detects <- dplyr::left_join(sb, hud_detects,
 # Assign arrays
 array_greps <- list(
   'Above' = 'can|br$|buoy 2\\d\\d',
-  'Saugerties-Coxsackie' = 'd buoy (7\\d|1[25]\\d)',
-  'Between' = 'rogers',
+  'Saugerties-Coxsackie' = 'd buoy ([79]\\d|1[25][249])',
+  'Between' = 'rogers|80',
   'West Point-Newburgh' = 'd buoy (27|[4-5]\\d)|king',
-  'Below' = 'd buoy *(7|[1-2][0-6])( |$)',
+  'Below' = 'rgn|d buoy *(7|[1-2][0-6|8]|1[2-4][358]|82)( |$)',
   'ME' = '^\\d',
   'MA' = 'merri|taun|RI$',
   'Long Isl' = 'east r|ltb|[ny] [ew]|matti|e\\.c|junc|ique|thames',
