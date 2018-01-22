@@ -8,13 +8,12 @@ detects <- readRDS('hud_detects.RDS')
 plot.data <- detects %>%
   filter(variable == 'TL', !is.na(date.floor)) %>%
   distinct(date.floor, Transmitter, .keep_all = T) %>%
-  select(date.floor, Transmitter, value, Sex, array) %>%
   arrange(value, Transmitter) %>%
   mutate(trans.f = factor(Transmitter, levels = unique(Transmitter)))
 
-hud.cols <- colorRampPalette(c('red4', 'darksalmon'))(5)
+hud.cols <- colorRampPalette(c('red', 'pink'))(5)
 mab.cols <- colorRampPalette(c('blue', 'violet'))(3)
-ne.cols <- colorRampPalette(c('orange', 'orangered'))(3)
+ne.cols <- colorRampPalette(c('yellow', 'orange4'))(3)
 
 cols <- c('Above' = hud.cols[1], 'Saugerties-Coxsackie' = hud.cols[2],
           'Between' = hud.cols[3], 'West Point-Newburgh' = hud.cols[4],
@@ -27,13 +26,14 @@ cols <- c('Above' = hud.cols[1], 'Saugerties-Coxsackie' = hud.cols[2],
 
 music <- ggplot() + geom_raster(data = plot.data,
                                 aes(x = date.floor, y = trans.f, fill = array)) +
-  labs(x = 'Date', y = 'Length (cm) ->') +
+  labs(x = 'Date') +
   scale_fill_manual(values = cols, breaks =
             c('Above', 'Saugerties-Coxsackie', 'Between', 'West Point-Newburgh',
               'Below', 'ME', 'MA', 'Long Isl', 'NJ Coast', 'DE Coast',
               'MD Coast', 'Ches')) +
-  theme(axis.text.y = element_blank())
-  # xlim(c(ymd_hms('2016-05-19 00:00:00'), ymd_hms('2016-07-01 00:00:00'))) +
+  facet_wrap(~ Region, ncol = 1, scales = 'free_y') +
+  theme(axis.text.y = element_blank(), axis.title.y = element_blank()) +
+  xlim(c(ymd_hms('2016-05-19 00:00:00'), ymd_hms('2017-12-20 00:00:00')))
   # theme(legend.position = c(0.9, 0.85))
 
 
