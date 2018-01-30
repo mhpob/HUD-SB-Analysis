@@ -58,8 +58,8 @@ avg.pos.spl <- lapply(avg.pos.spl, function(x){
 imp.pos <- do.call(rbind, avg.pos.spl)
 
 # ggplot(data = imp.pos) +
-#   geom_point(aes(x = floor.date, y = lat.imp)) +
-#   geom_point(aes(x = floor.date, y = lat.avg), col = 'red') +
+#   geom_point(aes(x = date.floor, y = lat.imp)) +
+#   geom_point(aes(x = date.floor, y = lat.avg), col = 'red') +
 #   facet_wrap(~Transmitter)
 
 # First crack at DFA using MARSS ----
@@ -67,7 +67,7 @@ imp.pos <- do.call(rbind, avg.pos.spl)
 
 library(MARSS)
 library(reshape2)
-k <- dcast(avg.pos, Transmitter ~ floor.date, value.var = 'lat.imp')
+k <- dcast(avg.pos, Transmitter ~ date.floor, value.var = 'lat.imp')
 row.names(k) <- k$Transmitter
 k <- as.matrix(k[, -1])
 
@@ -96,13 +96,7 @@ for(i in 1:2) {
   mtext(paste("Factor loadings on trend",i,sep=" "),side=3,line=.5)
 } # end i loop
 
-plot(cbind(trends.rot[1,], trends.rot[2,]) ~
-          seq(ymd('2017-04-04'), ymd('2017-06-24'), by = 'day'), xaxt = 'n', xlab = '')
-axis.Date(1, at = seq(ymd('2017-04-04'), ymd('2017-06-24'), by = 'month'),
-          format = '%b')
-
-
-# Second crack (padded time series) ----
+# Second crack (padded time series), Data munging ----
 #  The first crack yields weird behavior on the ends of the trends/modeled ts,
 #  Might be due to NAs on the ends of the ts being modeled as missing data of a
 #  trend that tends toward mean latitude (~ 41.5 - 42.0).
@@ -136,10 +130,65 @@ avg.pos.spl <- lapply(avg.pos.spl, function(x){
 
 pad.pos <- do.call(rbind, avg.pos.spl)
 
-ggplot(data = pad.pos) +
-  geom_point(aes(x = date.floor, y = lat.imp)) +
-  geom_point(aes(x = date.floor, y = lat.avg), col = 'red') +
-  facet_wrap(~Transmitter)
+# ggplot(data = pad.pos) +
+#   geom_point(aes(x = date.floor, y = lat.imp)) +
+#   geom_point(aes(x = date.floor, y = lat.avg), col = 'red') +
+#   facet_wrap(~Transmitter)
+
+# Second crack, DFA ----
+library(MARSS)
+
+k <- reshape2::dcast(pad.pos, Transmitter ~ date.floor, value.var = 'lat.imp')
+row.names(k) <- k$Transmitter
+k <- as.matrix(k[, -1])
+
+dfa <- MARSS(k, form = 'dfa',
+             model = list(m = 2, R = 'diagonal and unequal'))
+
+# Model fits
+modeled.pos <- NULL
+for(i in 1:66){
+  hold <- as.vector(coef(dfa,type="matrix")$Z[i,,drop=FALSE] %*% dfa$states)
+  modeled.pos <- c(modeled.pos, hold)
+}
+
+modeled.pos <- cbind(pad.pos, fitted = modeled.pos)
+
+ggplot(data = modeled.pos, aes(x = date.floor)) +
+  geom_point(aes(y = scale(lat.imp)), color = 'slategray') +
+  geom_line(aes(y = fitted), color = 'blue') +
+  facet_wrap(~Transmitter) +
+  labs(x = 'Date', y = 'Normalized Latitude') +
+  theme_bw()
+
+# Trends and Loadings
+H.inv <- varimax(coef(dfa, type = 'matrix')$Z)$rotmat
+Z.rot <- coef(dfa, type = 'matrix')$Z %*% H.inv
+trends.rot <- solve(H.inv) %*% dfa$states
+
+trends.df <- data.frame(value = c(trends.rot[1,], trends.rot[2,]),
+                        date = rep(seq(ymd('2017-04-02'), ymd('2017-06-26'),
+                                       by = 'day'), times = 2),
+                        trend = rep(c('T1', 'T2'), each = 86))
+ggplot(trends.df) + geom_line(aes(x = date, y = value, color = trend))
+
+# Loadings
+spp = rownames(k)
+minZ = 0.05
+N.ts <- 66
+m <- 2
+ylims = c(-1.1*max(abs(Z.rot)), 1.1*max(abs(Z.rot)))
+par(mfrow=c(ceiling(dim(trends.rot)[1]/2),2), mar=c(3,4,1.5,0.5), oma=c(0.4,1,1,1))
+for(i in 1:m) {
+  plot(c(1:N.ts)[abs(Z.rot[,i])>minZ], as.vector(Z.rot[abs(Z.rot[,i])>minZ,i]),
+       type="h", lwd=2, xlab="", ylab="", xaxt="n", ylim=ylims, xlim=c(0,N.ts+1))
+  for(j in 1:N.ts) {
+    if(Z.rot[j,i] > minZ) {text(j, -0.05, spp[j], srt=90, adj=1, cex=0.9)}
+    if(Z.rot[j,i] < -minZ) {text(j, 0.05, spp[j], srt=90, adj=0, cex=0.9)}
+    abline(h=0, lwd=1, col="gray")
+  } # end j loop
+  mtext(paste("Factor loadings on trend",i,sep=" "),side=3,line=.5)
+} # end i loop
 
 
 # Future work ----
