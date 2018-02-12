@@ -18,7 +18,7 @@ hud <- hud %>%
 #    N/S system.
 
 agg.pos <- hud %>%
-  group_by(Transmitter, date.floor) %>%
+  group_by(Transmitter, Sex, Region, date.floor) %>%
   summarize(lat.avg = mean(as.numeric(lat)),
             lat.max = max(as.numeric(lat))) %>%
   arrange(date.floor)
