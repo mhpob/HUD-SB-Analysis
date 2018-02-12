@@ -111,3 +111,7 @@ agg.pad.imp <- do.call(rbind, agg.pad.spl)
 #   geom_point(data = agg.pad.imp, aes(x = date.floor, y = avg.imp), col = 'black') +
 #   geom_point(data = agg.pad.imp, aes(x = date.floor, y = lat.avg), col = 'red') +
 #   facet_wrap(~Transmitter)
+
+
+# Remove some things to clear up memory when being sourced ----
+rm(agg.pad.spl, agg.pos, agg.pos.spl, all, hud, hud.date.seq)
