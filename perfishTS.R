@@ -7,11 +7,16 @@ hud <- all %>%
          array %in% c('Above', 'Saugerties-Coxsackie', 'Between',
                       'West Point-Newburgh', 'Below'))
 
-# Need to find a better selection rule; but 11507 and 11480 should be dropped
-# since they probably died (last array isn't below WPT/NBGH)
-
+# Filter out dead fish & wrong contingents
 hud <- hud %>%
-  filter(!grepl('11480|11507', Transmitter))
+  filter(
+  # 11507 and 11480 should be dropped since they probably died (last array
+  # isn't below WPT/NBGH)
+    !grepl('11(480|507)', Transmitter),
+  # A handful weren't heard in the ocean, so may be LEC fish. Re-check as more
+  # data come in.
+    !grepl('114(31|37|40|68)', Transmitter))
+
 
 # Data munging ----
 # Find mean daily position. Start with mean lat, as Hudson is a linear
