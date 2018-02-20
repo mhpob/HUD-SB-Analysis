@@ -8,14 +8,10 @@ hud <- all %>%
                       'West Point-Newburgh', 'Below'))
 
 # Filter out dead fish & wrong contingents
+# 11507 and 11480 should be dropped since they probably died (last array
+# isn't below WPT/NBGH)
 hud <- hud %>%
-  filter(
-  # 11507 and 11480 should be dropped since they probably died (last array
-  # isn't below WPT/NBGH)
-    !grepl('11(480|507)', Transmitter),
-  # A handful weren't heard in the ocean, so may be LEC fish. Re-check as more
-  # data come in.
-    !grepl('114(31|37|40|68)', Transmitter))
+  filter(!grepl('11(480|507)', Transmitter))
 
 
 # Data munging ----
@@ -31,7 +27,7 @@ agg.pos <- hud %>%
 # No padding ----
 # When the fish isn't heard on a day between first and last days detected,
 # insert a day with NA location. Fill this with imputed value.
-agg.pos.spl <- split(agg.pos, agg.pos$Transmitter)
+agg.pos.spl <- split(as.data.frame(agg.pos), agg.pos$Transmitter)
 agg.pos.spl <- lapply(agg.pos.spl, function(x){
   hold <- data.frame(date.floor = seq(range(x$date.floor)[1],
                                       range(x$date.floor)[2],
