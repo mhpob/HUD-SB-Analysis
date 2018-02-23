@@ -66,7 +66,9 @@ agg.pos.imp <- do.call(rbind, agg.pos.spl)
 #            ymin = 41.32, ymax = 41.52, fill = 'lightblue') +
 #   geom_point(data = agg.pos.imp, aes(x = date.floor, y = avg.imp), col = 'black') +
 #   geom_point(data = agg.pos.imp, aes(x = date.floor, y = lat.avg), col = 'red') +
-#   facet_wrap(~Transmitter)
+#   labs(x = NULL, y = NULL) +
+#   facet_wrap(~Transmitter) +
+#   theme_bw()
 
 
 # Padded data ----
