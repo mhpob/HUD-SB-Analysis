@@ -22,18 +22,21 @@ hud_detects <- dplyr::left_join(sb, hud_detects,
 
 # Assign arrays
 array_greps <- list(
-  'Above' = 'can|br$|buoy 2\\d\\d',
+  'Above' = 'can( |$)|br$|buoy 2\\d\\d',
   'Saugerties-Coxsackie' = 'd buoy ([79]\\d|1\\d\\d)',
-  'Between' = 'rogers|rgn|8\\d',
+  'Between' = 'rogers|rgn|8\\d$',
   'West Point-Newburgh' = 'd buoy (27|[4-5]\\d)|king',
   'Below' = 'd buoy *(7|1\\d|2[0-6])( |$)',
   'ME' = '^\\d',
-  'MA' = 'merri|taun|RI$',
+  'MA' = paste0('barn|^b[bh]|buzz|ca\\d|ccc|(chat|hing)ham|ledge|beach|cutty|',
+                'ellis|gurnet|town|hull|m[ao]no|mar[bst]|mb|merri|mor|musk|',
+                'noman|orl|ph\\d|RI$|rocky|sand|scit|shark|taun|vs|well'),
   'LI Sound' = 'east r|matti|thames',
   'NY Coast' = 'ltb|[ny] [ew]|e\\.c|junc|ique|stony',
   'NJ Coast' = 'opt',
   'MD Coast' = '([at]|cs)-|inner|outer|middle|[iao][nms]\\d',
   'DE Coast' = 'BOEM',
+  'DE' = 'C&D|LL#',
   'Ches' = 'kent'
 )
 
