@@ -37,7 +37,7 @@ array_greps <- list(
   'MD Coast' = '([at]|cs)-|inner|outer|middle|[iao][nms]\\d',
   'DE Coast' = 'BOEM',
   'DE' = 'C&D|LL#',
-  'Ches' = 'kent'
+  'Ches' = 'kent|cedar'
 )
 
 station_list <- lapply(array_greps,
