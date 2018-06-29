@@ -12,16 +12,16 @@ plot.data <- detects %>%
   mutate(trans.f = factor(Transmitter, levels = unique(Transmitter)))
 
 hud.cols <- colorRampPalette(c('red', 'pink'))(5)
-mab.cols <- colorRampPalette(c('blue', 'violet'))(3)
+mab.cols <- colorRampPalette(c('blue', 'violet'))(4)
 ne.cols <- colorRampPalette(c('yellow', 'orange4'))(3)
 
 cols <- c('Above' = hud.cols[1], 'Saugerties-Coxsackie' = hud.cols[2],
           'Between' = hud.cols[3], 'West Point-Newburgh' = hud.cols[4],
           'Below' = hud.cols[5],
-          'NJ Coast' = mab.cols[1], 'DE Coast' = mab.cols[2],
-          'MD Coast' = mab.cols[3],
+          'NJ Coast' = mab.cols[1], 'DE Coast' = mab.cols[2], 'DE' = mab.cols[3],
+          'MD Coast' = mab.cols[4],
           'ME' = ne.cols[1], 'MA' = ne.cols[2],
-          'Long Isl' = ne.cols[3],
+          'LI Sound' = ne.cols[3], 'NY Coast' = ne.cols[3],
           'Ches' = 'green')
 
 music <- ggplot() + geom_raster(data = plot.data,
@@ -29,7 +29,8 @@ music <- ggplot() + geom_raster(data = plot.data,
   labs(x = 'Date') +
   scale_fill_manual(values = cols, breaks =
             c('Above', 'Saugerties-Coxsackie', 'Between', 'West Point-Newburgh',
-              'Below', 'ME', 'MA', 'Long Isl', 'NJ Coast', 'DE Coast',
+              'Below', 'ME', 'MA', 'LI Sound','NY Coast', 'NJ Coast', 'DE Coast',
+              'DE',
               'MD Coast', 'Ches')) +
   facet_wrap(~ Region, ncol = 1, scales = 'free_y') +
   theme(axis.text.y = element_blank(), axis.title.y = element_blank()) +
