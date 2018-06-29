@@ -10,8 +10,11 @@ sb <- reshape2::melt(sb, id.vars = c('Date','Batch', 'Location', 'Region',
                                      'Gear', 'Sex', 'Stage', 'Transmitter'),
                      measure.vars = c('TL', 'FL', 'Weight'))
 
+cl <- parallel::makeCluster(parallel::detectCores() - 1)
+hud_detects <- TelemetryR::vemsort('p:/obrien/biotelemetry/detections',
+                                   clust = cl)
+parallel::stopCluster(cl)
 
-hud_detects <- TelemetryR::vemsort('p:/obrien/biotelemetry/detections')
 hud_detects <- dplyr::filter(hud_detects, transmitter %in%
                                paste0('A69-1303-', seq(11423, 11522, 1)),
                              date.utc >= lubridate::ymd('2016-04-20'))
