@@ -33,11 +33,11 @@ detects <- left_join(detects, rec_rkm, by = 'station')
 agg_rkm <- filter(detects, !is.na(date.local)) %>%
   mutate(day = ceiling_date(date.local, unit = 'day'))
 
-ggplot() + geom_raster(data = agg_rkm, aes(x = day, y = trans.num,
+ggplot() + geom_raster(data = agg_rkm, aes(x = day, y = Transmitter,
                                            fill = rkm)) +
   scale_fill_gradient(low = 'blue', high = 'orange') +
   scale_x_datetime(limits = c(ymd_hms('2016-04-19 00:00:00'),
-                              ymd_hms('2016-06-19 00:00:00'))) +
+                              ymd_hms('2018-06-19 00:00:00'))) +
   facet_wrap(~ Region, ncol = 1, scales = 'free_y')  +
   theme_bw() +
   theme(legend.position = c(0.95, 0.2), axis.title.x = element_blank()) +

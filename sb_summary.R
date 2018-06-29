@@ -53,6 +53,6 @@ ggplot() + geom_line(data = loss, aes(x = date, y = remaining)) +
   scale_x_datetime(date_breaks = '3 month',
                    date_labels = '%b %Y',
                    limits = c(ymd_hms('2016-05-01 00:00:00'),
-                              ymd_hms('2017-08-31 00:00:00'))) +
+                              ymd_hms('2018-04-10 00:00:00'))) +
   theme_bw()
 
