@@ -45,7 +45,8 @@ cents <- data.frame(cent = rep(c('Centroid 1', 'Centroid 2'), each = 86),
 TS <- data.frame(TS = do.call(c, c2@datalist),
                  trans = rep(names(c2@datalist), each = 86),
                  date = rep(unique(agg.pad.imp$date.floor), times = 66),
-                 cent = paste0('Centroid ', rep(c2@cluster, each = 86)))
+                 cent = paste0('Centroid ', rep(c2@cluster, each = 86))) %>%
+  left_join(distinct(detects, Transmitter, Sex), by = c('trans' = 'Transmitter'))
 
 ggplot(cents) +
   facet_wrap(~cent) + ylim(40.8, 42.75) +
@@ -55,20 +56,33 @@ ggplot(cents) +
   annotate('rect', xmin = ymd_hms('2017-04-02 00:00:00'),
            xmax = ymd_hms('2017-06-24 00:00:00'),
            ymin = 41.32, ymax = 41.52, fill = 'lightblue') +
-  geom_line(data = TS, aes(x = date, y = TS, group = trans), color = 'gray') +
+  geom_line(data = TS, aes(x = date, y = TS, group = trans, color = Sex)) +
   geom_line(aes(x = date, y = value), lwd = 1.5) +
   labs(x = NULL, y = 'Latitude') +
   theme_bw()
 
 # 4 Clusters
-cents <- data.frame(cent = rep(c('Centroid 1', 'Centroid 2', 'Centroid 3', 'Centroid 4'), each = 86),
-                    value = c(c4@centroids[[1]], c4@centroids[[2]], c4@centroids[[3]], c4@centroids[[4]]),
+cents <- data.frame(cent = rep(paste('Centroid', 1:4, sep = ' '), each = 86),
+                    value = do.call(c, c4@centroids),
                     date = rep(unique(agg.pad.imp$date.floor), times = 4))
 
 TS <- data.frame(TS = do.call(c, c4@datalist),
                  trans = rep(names(c4@datalist), each = 86),
                  date = rep(unique(agg.pad.imp$date.floor), times = 66),
-                 cent = paste0('Centroid ', rep(c4@cluster, each = 86)))
+                 cent = paste0('Centroid ', rep(c4@cluster, each = 86))) %>%
+  left_join(distinct(detects, Transmitter, Sex), by = c('trans' = 'Transmitter'))
+
+#
+temp <- data.frame(Transmitter = names(c2@datalist), cluster = c2@cluster) %>%
+  left_join(distinct(detects, Transmitter, Region)) %>%
+  mutate(cluster = case_when(cluster == 1 ~ 'West Point-Newburgh',
+                             T ~ 'Saugerties-Coxsackie'),
+         correct = case_when(cluster == Region ~ T,
+                             T ~ F))
+
+# Correct/Incorrect classification
+temp %>% group_by(Region, correct) %>% summarize(n())
+
 
 # slotNames()
 # [1] "iter"      "converged" "clusinfo"  "cldist"    "call"      "family"    "control"   "datalist"
