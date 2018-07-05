@@ -60,6 +60,16 @@ ggplot(cents) +
   labs(x = NULL, y = 'Latitude') +
   theme_bw()
 
+# 4 Clusters
+cents <- data.frame(cent = rep(c('Centroid 1', 'Centroid 2', 'Centroid 3', 'Centroid 4'), each = 86),
+                    value = c(c4@centroids[[1]], c4@centroids[[2]], c4@centroids[[3]], c4@centroids[[4]]),
+                    date = rep(unique(agg.pad.imp$date.floor), times = 4))
+
+TS <- data.frame(TS = do.call(c, c4@datalist),
+                 trans = rep(names(c4@datalist), each = 86),
+                 date = rep(unique(agg.pad.imp$date.floor), times = 66),
+                 cent = paste0('Centroid ', rep(c4@cluster, each = 86)))
+
 # slotNames()
 # [1] "iter"      "converged" "clusinfo"  "cldist"    "call"      "family"    "control"   "datalist"
 # [9] "type"      "distance"  "centroid"  "preproc"   "k"         "cluster"   "centroids" "distmat"
