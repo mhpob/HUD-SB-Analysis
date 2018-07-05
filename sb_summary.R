@@ -47,12 +47,16 @@ WN2SC <- detects %>%
 # Transmitter loss
 library(TelemetryR); library(lubridate)
 loss <- trans_loss(detects, 'date.local', 'Transmitter')
+loss <- lapply(split(detects, detects$Region), trans_loss, 'date.local', 'Transmitter') %>%
+  bind_rows(.id = 'Region')
 
-ggplot() + geom_line(data = loss, aes(x = date, y = remaining)) +
+ggplot() + geom_line(data = loss, aes(x = date, y = remaining, color = Region), lwd = 1.5) +
   labs(x = NULL, y = 'Fish Remaining') +
   scale_x_datetime(date_breaks = '3 month',
                    date_labels = '%b %Y',
                    limits = c(ymd_hms('2016-05-01 00:00:00'),
                               ymd_hms('2018-04-10 00:00:00'))) +
-  theme_bw()
+  theme_bw() +
+  theme(legend.position = c(0.9, 0.9))
+
 
