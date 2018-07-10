@@ -12,7 +12,7 @@ sb <- reshape2::melt(sb, id.vars = c('Date','Batch', 'Location', 'Region',
 
 cl <- parallel::makeCluster(parallel::detectCores() - 1)
 hud_detects <- TelemetryR::vemsort('p:/obrien/biotelemetry/detections',
-                                   clust = cl)
+                                   clust = cl, prog_bar = T)
 parallel::stopCluster(cl)
 
 hud_detects <- dplyr::filter(hud_detects, transmitter %in%
@@ -26,7 +26,7 @@ hud_detects <- dplyr::left_join(sb, hud_detects,
 # Assign arrays
 array_greps <- list(
   'Above' = 'can( |$)|br$|buoy 2\\d\\d',
-  'Saugerties-Coxsackie' = 'd buoy ([79]\\d|1\\d\\d)',
+  'Saugerties-Coxsackie' = '(d buoy |[rg])([79]\\d|1\\d\\d)',
   'Between' = 'rogers|rgn|8\\d$',
   'West Point-Newburgh' = 'd buoy (27|[4-5]\\d)|king',
   'Below' = 'd buoy *(7|1\\d|2[0-6])( |$)',
@@ -37,10 +37,11 @@ array_greps <- list(
   'LI Sound' = 'east r|matti|thames',
   'NY Coast' = 'ltb|[ny] [ew]|e\\.c|junc|ique|stony',
   'NJ Coast' = 'opt',
-  'MD Coast' = '([at]|cs)-|inner|outer|middle|[iao][nms]\\d',
   'DE Coast' = 'BOEM',
   'DE' = 'C&D|LL#',
-  'Ches' = 'kent|cedar'
+  'MD Coast' = '([at]|cs)-|inner|outer|middle|[iao][nms]\\d',
+  'VA Coast' = 'scl|wea|ncc|^cb ',
+  'Ches' = 'cbbt|^york|^b\\d|kent|cedar'
 )
 
 station_list <- lapply(array_greps,
