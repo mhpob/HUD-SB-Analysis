@@ -2,23 +2,32 @@
 library(ggplot2); library(imputeTS); library(lubridate); library(dplyr)
 
 all <- readRDS('hud_detects.RDS')
-hud <- all %>%
+# 2017 spawning season (encompassed by Mar through June)
+hud17 <- all %>%
   filter(date.local >= '2017-03-15',
+         date.local <= '2017-07-01',
+         array %in% c('Above', 'Saugerties-Coxsackie', 'Between',
+                      'West Point-Newburgh', 'Below'),
+         # 11507 and 11480 should be dropped since they probably died (last array
+         # isn't below WPT/NBGH)
+         !grepl('11(480|507)', Transmitter))
+
+# 2018 spawning season
+hud18 <- all %>%
+  filter(date.local >= '2018-03-15',
+         date.local <= '2018-07-01',
          array %in% c('Above', 'Saugerties-Coxsackie', 'Between',
                       'West Point-Newburgh', 'Below'))
 
-# Filter out dead fish & wrong contingents
-# 11507 and 11480 should be dropped since they probably died (last array
-# isn't below WPT/NBGH)
-hud <- hud %>%
-  filter(!grepl('11(480|507)', Transmitter))
-
+ggplot() + geom_point(data = distinct(hud18, Transmitter, date.local, lat),
+                      aes(x = date.local, y = lat))+
+  facet_wrap(~Transmitter)
 
 # Data munging ----
 # Find mean daily position. Start with mean lat, as Hudson is a linear
 #    N/S system.
 
-agg.pos <- hud %>%
+agg.pos <- hud18 %>%
   group_by(Transmitter, Sex, Region, date.floor) %>%
   summarize(lat.avg = mean(as.numeric(lat)),
             lat.max = max(as.numeric(lat))) %>%
@@ -46,29 +55,29 @@ agg.pos.spl <- lapply(agg.pos.spl, function(x){
 agg.pos.imp <- do.call(rbind, agg.pos.spl)
 
 # Mean daily latitude
-# ggplot() +
-#   annotate('rect', xmin = as.POSIXct('2017-04-01'),
-#            xmax = as.POSIXct('2017-06-24'),
-#            ymin = 42.07, ymax = 42.36, fill = 'pink') +
-#   annotate('rect', xmin = as.POSIXct('2017-04-01'),
-#            xmax = as.POSIXct('2017-06-24'),
-#            ymin = 41.32, ymax = 41.52, fill = 'lightblue') +
-#   geom_point(data = agg.pos.imp, aes(x = date.floor, y = lat.max), col = 'red') +
-#   facet_wrap(~Transmitter)
+ggplot() +
+  annotate('rect', xmin = as.POSIXct('2018-04-01'),
+           xmax = as.POSIXct('2018-06-24'),
+           ymin = 42.07, ymax = 42.36, fill = 'pink') +
+  annotate('rect', xmin = as.POSIXct('2018-04-01'),
+           xmax = as.POSIXct('2018-06-24'),
+           ymin = 41.32, ymax = 41.52, fill = 'lightblue') +
+  geom_point(data = agg.pos.imp, aes(x = date.floor, y = lat.max), col = 'red') +
+  facet_wrap(~Transmitter)
 
 # Mean daily imputed latitude
-# ggplot() +
-#   annotate('rect', xmin = as.POSIXct('2017-04-01'),
-#            xmax = as.POSIXct('2017-06-24'),
-#            ymin = 42.07, ymax = 42.36, fill = 'pink') +
-#   annotate('rect', xmin = as.POSIXct('2017-04-01'),
-#            xmax = as.POSIXct('2017-06-24'),
-#            ymin = 41.32, ymax = 41.52, fill = 'lightblue') +
-#   geom_point(data = agg.pos.imp, aes(x = date.floor, y = avg.imp), col = 'black') +
-#   geom_point(data = agg.pos.imp, aes(x = date.floor, y = lat.avg), col = 'red') +
-#   labs(x = NULL, y = NULL) +
-#   facet_wrap(~Transmitter) +
-#   theme_bw()
+ggplot() +
+  annotate('rect', xmin = as.POSIXct('2018-04-01'),
+           xmax = as.POSIXct('2018-06-24'),
+           ymin = 42.07, ymax = 42.36, fill = 'pink') +
+  annotate('rect', xmin = as.POSIXct('2018-04-01'),
+           xmax = as.POSIXct('2018-06-24'),
+           ymin = 41.32, ymax = 41.52, fill = 'lightblue') +
+  geom_point(data = agg.pos.imp, aes(x = date.floor, y = avg.imp), col = 'black') +
+  geom_point(data = agg.pos.imp, aes(x = date.floor, y = lat.avg), col = 'red') +
+  labs(x = NULL, y = NULL) +
+  facet_wrap(~Transmitter) +
+  theme_bw()
 
 
 # Padded data ----
