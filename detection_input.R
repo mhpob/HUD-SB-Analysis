@@ -6,13 +6,15 @@ sb <- dplyr::mutate(sb, TL = TL/10,
                     Region = ifelse(Location == 'RM 59',
                                     'West Point-Newburgh',
                                     'Saugerties-Coxsackie'))
-sb <- reshape2::melt(sb, id.vars = c('Date','Batch', 'Location', 'Region',
+sb <- reshape2::melt(sb, id.vars = c('TagDate','Batch', 'Location', 'Region',
                                      'Gear', 'Sex', 'Stage', 'Transmitter'),
                      measure.vars = c('TL', 'FL', 'Weight'))
+names(sb) <- tolower(names(sb))
 
 cl <- parallel::makeCluster(parallel::detectCores() - 1)
 hud_detects <- TelemetryR::vemsort('p:/obrien/biotelemetry/detections',
-                                   clust = cl, prog_bar = T)
+                                   clust = cl, prog_bar = T,
+                                   creation_date = '2016-01-01')
 parallel::stopCluster(cl)
 
 hud_detects <- dplyr::filter(hud_detects, transmitter %in%
@@ -20,25 +22,28 @@ hud_detects <- dplyr::filter(hud_detects, transmitter %in%
                              date.utc >= lubridate::ymd('2016-04-20'))
 hud_detects$date.floor <- lubridate::floor_date(hud_detects$date.local,
                                                 unit = 'day')
-hud_detects <- dplyr::left_join(sb, hud_detects,
-                                by = c('Transmitter' = 'transmitter'))
+hud_detects <- dplyr::left_join(sb, hud_detects)
 
 # Assign arrays
 array_greps <- list(
-  'Above' = 'can( |$)|br$|buoy 2\\d\\d',
-  'Saugerties-Coxsackie' = '(d buoy |[rg])([79]\\d|1\\d\\d)',
-  'Between' = 'rogers|rgn|8\\d$',
-  'West Point-Newburgh' = 'd buoy (27|[4-5]\\d)|king',
+  'Above' = 'can( |$)|br$|buoy 2\\d\\d|LB 1[6-9]\\d',
+  # Lower Coxsackie Island (~42.36 N)
+  'Saugerties-Coxsackie' = '(d buoy |[rg])(9\\d|1\\d\\d)|lb 1[015]\\d',
+  # Saugerties Lighthouse (~42.07 N)
+  'Between' = 'boll|rogers|rgn|[ r][78]\\d$|lb ([abe7]|6\\d)', #74
+  # Should be I-84 (41.52N), but using Whites Marina (~41.58 N)
+  'West Point-Newburgh' = 'd buoy (27|[4-5]\\d)|king|LL# 3[78][90][1-8].',
+  # Should be Bear Mtn Br (~41.32), but using above Verplanck (41.26)
   'Below' = 'd buoy *(7|1\\d|2[0-6])( |$)',
   'ME' = '^\\d',
   'MA' = paste0('barn|^b[bh]|buzz|ca\\d|ccc|(chat|hing)ham|ledge|beach|cutty|',
-                'ellis|gurnet|town|hull|m[ao]no|mar[bst]|mb|merri|mor|musk|',
+                'ellis|gurnet|town|hull|m[ao]no|mar[bst]|mb|merri|mori|musk|',
                 'noman|orl|ph\\d|RI$|rocky|sand|scit|shark|taun|vs|well'),
   'LI Sound' = 'east r|matti|thames',
   'NY Coast' = 'ltb|[ny] [ew]|e\\.c|junc|ique|stony',
   'NJ Coast' = 'opt',
   'DE Coast' = 'BOEM',
-  'DE' = 'C&D|LL#',
+  'DE' = 'C&D|LL# [23]... ',
   'MD Coast' = '([at]|cs)-|inner|outer|middle|[iao][nms]\\d',
   'VA Coast' = 'scl|wea|ncc|^cb ',
   'Ches' = 'cbbt|^york|^b\\d|kent|cedar'
