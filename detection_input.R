@@ -34,8 +34,8 @@ array_greps <- list(
   # Should be I-84 (41.52N), but using Whites Marina (~41.58 N)
   'West Point-Newburgh' = 'd buoy (27|[4-5]\\d)|king|LL# 3[78][90][1-8].',
   # Should be Bear Mtn Br (~41.32), but using above Verplanck (41.26)
-  'Below' = 'd buoy *(7|1\\d|2[0-6])( |$)',
-  'ME' = '^\\d',
+  'Below' = 'croton|d buoy *(7|1\\d|2[0-6])( |$)',
+  'ME' = '^\\d\\d',
   'MA' = paste0('barn|^b[bh]|buzz|ca\\d|ccc|(chat|hing)ham|ledge|beach|cutty|',
                 'ellis|gurnet|town|hull|m[ao]no|mar[bst]|mb|merri|mori|musk|',
                 'noman|orl|ph\\d|RI$|rocky|sand|scit|shark|taun|vs|well'),
@@ -45,7 +45,7 @@ array_greps <- list(
   'DE Coast' = 'BOEM',
   'DE' = 'C&D|LL# [23]... ',
   'MD Coast' = '([at]|cs)-|inner|outer|middle|[iao][nms]\\d',
-  'VA Coast' = 'scl|wea|ncc|^cb ',
+  'VA Coast' = 'scl|wea|ncc|^cb |2c ',
   'Ches' = 'cbbt|^york|^b\\d|kent|cedar'
 )
 
