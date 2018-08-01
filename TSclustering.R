@@ -3,13 +3,13 @@ library(dtwclust)
 source('perfishTS.R')
 
 # agg.pad.imp <- agg.pad.imp %>%
-#   group_by(Transmitter) %>%
+#   group_by(transmitter) %>%
 #   mutate(avg.scale = scale(avg.imp, center = 40.85, scale = sd(avg.imp)))
-# test <- split(agg.pad.imp, agg.pad.imp$Transmitter)
+# test <- split(agg.pad.imp, agg.pad.imp$transmitter)
 
 # Put time series into rows ----
-r_series <- reshape2::dcast(agg.pad.imp, Transmitter ~ date.floor, value.var = 'avg.imp')
-row.names(r_series) <- r_series$Transmitter
+r_series <- reshape2::dcast(agg.pad.imp, transmitter ~ date.floor, value.var = 'avg.imp')
+row.names(r_series) <- r_series$transmitter
 r_series <- as.matrix(r_series[, -1])
 
 
@@ -46,7 +46,7 @@ TS <- data.frame(TS = do.call(c, c2@datalist),
                  trans = rep(names(c2@datalist), each = 86),
                  date = rep(unique(agg.pad.imp$date.floor), times = 66),
                  cent = paste0('Centroid ', rep(c2@cluster, each = 86))) %>%
-  left_join(distinct(detects, Transmitter, Sex), by = c('trans' = 'Transmitter'))
+  left_join(distinct(detects, transmitter, Sex), by = c('trans' = 'transmitter'))
 
 ggplot(cents) +
   facet_wrap(~cent) + ylim(40.8, 42.75) +
@@ -70,18 +70,18 @@ TS <- data.frame(TS = do.call(c, c4@datalist),
                  trans = rep(names(c4@datalist), each = 86),
                  date = rep(unique(agg.pad.imp$date.floor), times = 66),
                  cent = paste0('Centroid ', rep(c4@cluster, each = 86))) %>%
-  left_join(distinct(detects, Transmitter, Sex), by = c('trans' = 'Transmitter'))
+  left_join(distinct(detects, transmitter, Sex), by = c('trans' = 'transmitter'))
 
 #
-temp <- data.frame(Transmitter = names(c2@datalist), cluster = c2@cluster) %>%
-  left_join(distinct(detects, Transmitter, Region)) %>%
+temp <- data.frame(transmitter = names(c2@datalist), cluster = c2@cluster) %>%
+  left_join(distinct(detects, transmitter, region)) %>%
   mutate(cluster = case_when(cluster == 1 ~ 'West Point-Newburgh',
                              T ~ 'Saugerties-Coxsackie'),
-         correct = case_when(cluster == Region ~ T,
+         correct = case_when(cluster == region ~ T,
                              T ~ F))
 
 # Correct/Incorrect classification
-temp %>% group_by(Region, correct) %>% summarize(n())
+temp %>% group_by(region, correct) %>% summarize(n())
 
 
 # slotNames()
@@ -91,11 +91,11 @@ temp %>% group_by(Region, correct) %>% summarize(n())
 
 plot.data <- agg.pos.imp %>%
   ungroup() %>%
-  mutate(Transmitter = factor(Transmitter,
-                              levels = levels(factor(Transmitter))[ord]))
+  mutate(transmitter = factor(transmitter,
+                              levels = levels(factor(transmitter))[ord]))
 
 
-ggplot() + geom_raster(data = plot.data, aes(x = date.floor, y = Transmitter,
+ggplot() + geom_raster(data = plot.data, aes(x = date.floor, y = transmitter,
                                            fill = avg.imp)) +
   scale_fill_gradient(low = 'blue', high = 'orange') +
   scale_x_datetime(limits = c(ymd_hms('2017-04-02 00:00:00'),
@@ -113,8 +113,8 @@ frechet_func <- function(x, y){distFrechet()}
 
 
 # kml and kmlShape (which is different from kShape...) ----
-k <- reshape2::dcast(agg.pad.imp, Transmitter ~ date.floor, value.var = 'avg.imp')
-row.names(k) <- k$Transmitter
+k <- reshape2::dcast(agg.pad.imp, transmitter ~ date.floor, value.var = 'avg.imp')
+row.names(k) <- k$transmitter
 k <- as.matrix(k[, -1])
 
 library(kmlShape)

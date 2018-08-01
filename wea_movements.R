@@ -3,7 +3,7 @@ library(TelemetryR)
 detects <- readRDS('hud_detects.RDS')
 
 
-spl.dets <- split(detects, detects$Transmitter)
+spl.dets <- split(detects, detects$transmitter)
 
 gen.tracks <- lapply(spl.dets, track, dates = 'date.local', ids = 'station')
 

@@ -10,18 +10,18 @@ hud <- all %>%
 # Need to find a better selection rule; but 11507 and 11480 should be dropped
 # since they probably died (last array isn't below WPT/NBGH)
 hud %>%
-  group_by(Transmitter) %>%
+  group_by(transmitter) %>%
   arrange(date.local) %>%
   summarize(last(date.local),
             last(array))
 
 hud <- hud %>%
-  filter(!grepl('11480|11507', Transmitter))
+  filter(!grepl('11480|11507', transmitter))
 
 # Number of fish from each spawning region left in the analysis
-# group_by(hud, Region) %>% summarize(n_distinct(Transmitter))
+# group_by(hud, Region) %>% summarize(n_distinct(transmitter))
 # library(ggplot2)
-# ggplot() + geom_point(data = hud, aes(x = date.local, y = Transmitter,
+# ggplot() + geom_point(data = hud, aes(x = date.local, y = transmitter,
 #                                       color = array))
 
 # Data munging ----
@@ -29,7 +29,7 @@ hud <- hud %>%
 #    N/S system.
 
 avg.pos <- hud %>%
-  group_by(Transmitter, date.floor) %>%
+  group_by(transmitter, date.floor) %>%
   summarize(lat.avg = mean(as.numeric(lat))) %>%
   arrange(date.floor)
 
@@ -37,7 +37,7 @@ avg.pos <- hud %>%
 #    Check out methods in imputeTS. Using moving average; others more appropriate?
 
 # On a per-fish basis...
-avg.pos.spl <- split(avg.pos, avg.pos$Transmitter)
+avg.pos.spl <- split(avg.pos, avg.pos$transmitter)
 
 # When the fish isn't heard on a day between first and last days detected,
 # insert a day with NA location. Fill this with imputed value.
@@ -46,7 +46,7 @@ avg.pos.spl <- lapply(avg.pos.spl, function(x){
   hold <- data.frame(date.floor = seq(range(x$date.floor)[1],
                                       range(x$date.floor)[2],
                                       by = 'day'),
-                     Transmitter = x$Transmitter[1])
+                     transmitter = x$transmitter[1])
   suppressWarnings(suppressMessages(
   x %>%
     full_join(hold) %>%
@@ -60,14 +60,14 @@ imp.pos <- do.call(rbind, avg.pos.spl)
 # ggplot(data = imp.pos) +
 #   geom_point(aes(x = date.floor, y = lat.imp)) +
 #   geom_point(aes(x = date.floor, y = lat.avg), col = 'red') +
-#   facet_wrap(~Transmitter)
+#   facet_wrap(~transmitter)
 
 # First crack at DFA using MARSS ----
 # https://cran.r-project.org/web/packages/MARSS/vignettes/UserGuide.pdf
 
 library(MARSS)
-k <- reshape2::dcast(agg.pos.imp, Transmitter ~ date.floor, value.var = 'avg.imp')
-row.names(k) <- k$Transmitter
+k <- reshape2::dcast(agg.pos.imp, transmitter ~ date.floor, value.var = 'avg.imp')
+row.names(k) <- k$transmitter
 k <- as.matrix(k[, -1])
 
 
@@ -85,7 +85,7 @@ modeled.pos <- data.frame(date.floor = rep(seq(range(hud$date.floor)[1],
                                           range(hud$date.floor)[2], by = 'day'),
                                       times = 66),
                           fitted = modeled.pos,
-                          Transmitter = rep(unique(agg.pos.imp$Transmitter),
+                          transmitter = rep(unique(agg.pos.imp$transmitter),
                                             each = 82))
 modeled.pos <- modeled.pos %>%
   left_join(agg.pos.imp)
@@ -93,7 +93,7 @@ modeled.pos <- modeled.pos %>%
 ggplot(data = modeled.pos, aes(x = date.floor)) +
   geom_point(aes(y = as.vector(scale(avg.imp))), color = 'slategray') +
   geom_line(aes(y = fitted), color = 'blue') +
-  facet_wrap(~Transmitter) +
+  facet_wrap(~transmitter) +
   labs(x = 'Date', y = 'Normalized Latitude') +
   theme_bw()
 
@@ -133,7 +133,7 @@ for(i in 1:2) {
 #  For this attempt, fill the beginning/ending NAs with GWB's latitude (40.85).
 #  This will assume that the fish are making excursions from a resident pool
 #  below GWB.
-avg.pos.spl <- split(avg.pos, avg.pos$Transmitter)
+avg.pos.spl <- split(avg.pos, avg.pos$transmitter)
 
 hud.date.seq <- range(hud$date.floor)
 hud.date.seq <- seq(hud.date.seq[1] - days(2), hud.date.seq[2] + days(2),
@@ -141,7 +141,7 @@ hud.date.seq <- seq(hud.date.seq[1] - days(2), hud.date.seq[2] + days(2),
 
 avg.pos.spl <- lapply(avg.pos.spl, function(x){
   hold <- data.frame(date.floor = hud.date.seq,
-                     Transmitter = x$Transmitter[1])
+                     transmitter = x$transmitter[1])
   suppressWarnings(suppressMessages(
   hold <- x %>%
     full_join(hold) %>%
@@ -162,13 +162,13 @@ pad.pos <- do.call(rbind, avg.pos.spl)
 # ggplot(data = pad.pos) +
 #   geom_point(aes(x = date.floor, y = lat.imp)) +
 #   geom_point(aes(x = date.floor, y = lat.avg), col = 'red') +
-#   facet_wrap(~Transmitter)
+#   facet_wrap(~transmitter)
 
 # Second crack, DFA ----
 library(MARSS)
 
-k <- reshape2::dcast(agg.pad.imp, Transmitter ~ date.floor, value.var = 'avg.imp')
-row.names(k) <- k$Transmitter
+k <- reshape2::dcast(agg.pad.imp, transmitter ~ date.floor, value.var = 'avg.imp')
+row.names(k) <- k$transmitter
 k <- as.matrix(k[, -1])
 
 dfa <- MARSS(k, form = 'dfa',
@@ -186,7 +186,7 @@ modeled.pos <- cbind(agg.pad.imp, fitted = modeled.pos)
 ggplot(data = modeled.pos, aes(x = date.floor)) +
   geom_point(aes(y = as.vector(scale(avg.imp))), color = 'slategray') +
   geom_line(aes(y = fitted), color = 'blue') +
-  facet_wrap(~Transmitter) +
+  facet_wrap(~transmitter) +
   labs(x = 'Date', y = 'Normalized Latitude') +
   theme_bw()
 
@@ -221,7 +221,7 @@ for(i in 1:m) {
 
 # Third crack a (unpadded, normalized to GWB), Data munging ----
 avg.pos$GWBscale <- scale(avg.pos$lat.avg, center = 40.85, scale = sd(avg.pos$lat.avg))
-avg.pos.spl <- split(avg.pos, avg.pos$Transmitter)
+avg.pos.spl <- split(avg.pos, avg.pos$transmitter)
 
 # When the fish isn't heard on a day between first and last days detected,
 # insert a day with NA location. Fill this with imputed value.
@@ -230,7 +230,7 @@ avg.pos.spl <- lapply(avg.pos.spl, function(x){
   hold <- data.frame(date.floor = seq(range(x$date.floor)[1],
                                       range(x$date.floor)[2],
                                       by = 'day'),
-                     Transmitter = x$Transmitter[1])
+                     transmitter = x$transmitter[1])
   suppressWarnings(suppressMessages(
     x %>%
       full_join(hold) %>%
@@ -245,8 +245,8 @@ imp.pos <- do.call(rbind, avg.pos.spl)
 # Third crack a, DFA ----
 library(MARSS)
 
-k <- reshape2::dcast(imp.pos, Transmitter ~ date.floor, value.var = 'lat.imp')
-row.names(k) <- k$Transmitter
+k <- reshape2::dcast(imp.pos, transmitter ~ date.floor, value.var = 'lat.imp')
+row.names(k) <- k$transmitter
 k <- as.matrix(k[, -1])
 
 dfa <- MARSS(k, form = 'dfa',
@@ -263,7 +263,7 @@ modeled.pos <- data.frame(date.floor = rep(seq(range(hud$date.floor)[1],
                                                range(hud$date.floor)[2], by = 'day'),
                                            times = 66),
                           fitted = modeled.pos,
-                          Transmitter = rep(unique(imp.pos$Transmitter),
+                          transmitter = rep(unique(imp.pos$transmitter),
                                             each = 82))
 modeled.pos <- modeled.pos %>%
   left_join(imp.pos)
@@ -271,7 +271,7 @@ modeled.pos <- modeled.pos %>%
 ggplot(data = modeled.pos, aes(x = date.floor)) +
   geom_point(aes(y = lat.imp), color = 'slategray') +
   geom_line(aes(y = fitted), color = 'blue') +
-  facet_wrap(~Transmitter) +
+  facet_wrap(~transmitter) +
   labs(x = 'Date', y = 'Normalized Latitude') +
   theme_bw()
 
@@ -309,7 +309,7 @@ for(i in 1:m) {
 # Third crack b (padded, normalized to GWB), Data munging ----
 avg.pos$GWBscale <- scale(avg.pos$lat.avg, center = 40.85, scale = sd(avg.pos$lat.avg))
 
-avg.pos.spl <- split(avg.pos, avg.pos$Transmitter)
+avg.pos.spl <- split(avg.pos, avg.pos$transmitter)
 
 hud.date.seq <- range(hud$date.floor)
 hud.date.seq <- seq(hud.date.seq[1] - days(2), hud.date.seq[2] + days(2),
@@ -318,7 +318,7 @@ hud.date.seq <- seq(hud.date.seq[1] - days(2), hud.date.seq[2] + days(2),
 library(imputeTS)
 avg.pos.spl <- lapply(avg.pos.spl, function(x){
   hold <- data.frame(date.floor = hud.date.seq,
-                     Transmitter = x$Transmitter[1])
+                     transmitter = x$transmitter[1])
   suppressWarnings(suppressMessages(
     hold <- x %>%
       full_join(hold) %>%
@@ -339,8 +339,8 @@ pad.pos <- do.call(rbind, avg.pos.spl)
 # Third crack b, DFA ----
 library(MARSS)
 
-k <- reshape2::dcast(pad.pos, Transmitter ~ date.floor, value.var = 'lat.imp')
-row.names(k) <- k$Transmitter
+k <- reshape2::dcast(pad.pos, transmitter ~ date.floor, value.var = 'lat.imp')
+row.names(k) <- k$transmitter
 k <- as.matrix(k[, -1])
 
 dfa <- MARSS(k, form = 'dfa',
@@ -358,7 +358,7 @@ modeled.pos <- cbind(pad.pos, fitted = modeled.pos)
 ggplot(data = modeled.pos, aes(x = date.floor)) +
   geom_point(aes(y = lat.imp), color = 'slategray') +
   geom_line(aes(y = fitted), color = 'blue') +
-  facet_wrap(~Transmitter) +
+  facet_wrap(~transmitter) +
   labs(x = 'Date', y = 'Normalized Latitude') +
   theme_bw()
 

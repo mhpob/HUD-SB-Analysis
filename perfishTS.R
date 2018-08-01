@@ -10,7 +10,7 @@ hud17 <- all %>%
                       'West Point-Newburgh', 'Below'),
          # 11507 and 11480 should be dropped since they probably died (last array
          # isn't below WPT/NBGH)
-         !grepl('11(480|507)', Transmitter))
+         !grepl('11(480|507)', transmitter))
 
 # 2018 spawning season
 hud18 <- all %>%
@@ -19,16 +19,16 @@ hud18 <- all %>%
          array %in% c('Above', 'Saugerties-Coxsackie', 'Between',
                       'West Point-Newburgh', 'Below'))
 
-ggplot() + geom_point(data = distinct(hud18, Transmitter, date.local, lat),
+ggplot() + geom_point(data = distinct(hud18, transmitter, date.local, lat),
                       aes(x = date.local, y = lat))+
-  facet_wrap(~Transmitter)
+  facet_wrap(~ transmitter)
 
 # Data munging ----
 # Find mean daily position. Start with mean lat, as Hudson is a linear
 #    N/S system.
 
 agg.pos <- hud18 %>%
-  group_by(Transmitter, Sex, Region, date.floor) %>%
+  group_by(transmitter, sex, region, date.floor) %>%
   summarize(lat.avg = mean(as.numeric(lat)),
             lat.max = max(as.numeric(lat))) %>%
   arrange(date.floor)
@@ -36,12 +36,12 @@ agg.pos <- hud18 %>%
 # No padding ----
 # When the fish isn't heard on a day between first and last days detected,
 # insert a day with NA location. Fill this with imputed value.
-agg.pos.spl <- split(as.data.frame(agg.pos), agg.pos$Transmitter)
+agg.pos.spl <- split(as.data.frame(agg.pos), agg.pos$transmitter)
 agg.pos.spl <- lapply(agg.pos.spl, function(x){
   hold <- data.frame(date.floor = seq(range(x$date.floor)[1],
                                       range(x$date.floor)[2],
                                       by = 'day'),
-                     Transmitter = x$Transmitter[1])
+                     transmitter = x$transmitter[1])
 
   suppressWarnings(suppressMessages(
     x %>%
@@ -63,7 +63,7 @@ ggplot() +
            xmax = as.POSIXct('2018-06-24'),
            ymin = 41.32, ymax = 41.52, fill = 'lightblue') +
   geom_point(data = agg.pos.imp, aes(x = date.floor, y = lat.max), col = 'red') +
-  facet_wrap(~Transmitter)
+  facet_wrap(~ transmitter)
 
 # Mean daily imputed latitude
 ggplot() +
@@ -76,18 +76,18 @@ ggplot() +
   geom_point(data = agg.pos.imp, aes(x = date.floor, y = avg.imp), col = 'black') +
   geom_point(data = agg.pos.imp, aes(x = date.floor, y = lat.avg), col = 'red') +
   labs(x = NULL, y = NULL) +
-  facet_wrap(~Transmitter) +
+  facet_wrap(~ transmitter) +
   theme_bw()
 
 
 # Padded data ----
-agg.pad.spl <- split(agg.pos, agg.pos$Transmitter)
+agg.pad.spl <- split(agg.pos, agg.pos$transmitter)
 hud.date.seq <- range(hud$date.floor)
 hud.date.seq <- seq(hud.date.seq[1] - days(2), hud.date.seq[2] + days(2),
                     by = 'day')
 agg.pad.spl <- lapply(agg.pad.spl, function(x){
   hold <- data.frame(date.floor = hud.date.seq,
-                     Transmitter = x$Transmitter[1])
+                     transmitter = x$transmitter[1])
   suppressWarnings(suppressMessages(
     hold <- x %>%
       full_join(hold) %>%
@@ -122,7 +122,7 @@ agg.pad.imp <- do.call(rbind, agg.pad.spl)
 #            ymin = 41.32, ymax = 41.52, fill = 'lightblue') +
 #   geom_point(data = agg.pad.imp, aes(x = date.floor, y = avg.imp), col = 'black') +
 #   geom_point(data = agg.pad.imp, aes(x = date.floor, y = lat.avg), col = 'red') +
-#   facet_wrap(~Transmitter)
+#   facet_wrap(~ transmitter)
 
 
 # Remove some things to clear up memory when being sourced ----

@@ -7,9 +7,9 @@ detects <- readRDS('hud_detects.RDS')
 #  Plotting
 plot.data <- detects %>%
   filter(variable == 'TL', !is.na(date.floor)) %>%
-  distinct(date.floor, Transmitter, .keep_all = T) %>%
-  arrange(value, Transmitter) %>%
-  mutate(trans.f = factor(Transmitter, levels = unique(Transmitter)))
+  distinct(date.floor, transmitter, .keep_all = T) %>%
+  arrange(value, transmitter) %>%
+  mutate(trans.f = factor(transmitter, levels = unique(transmitter)))
 
 hud.cols <- colorRampPalette(c('red', 'pink'))(5)
 mab.cols <- colorRampPalette(c('blue', 'violet'))(4)
@@ -32,7 +32,7 @@ music <- ggplot() + geom_raster(data = plot.data,
               'Below', 'ME', 'MA', 'LI Sound','NY Coast', 'NJ Coast', 'DE Coast',
               'DE',
               'MD Coast', 'Ches')) +
-  facet_wrap(~ Region, ncol = 1, scales = 'free_y') +
+  facet_wrap(~ region, ncol = 1, scales = 'free_y') +
   theme(axis.text.y = element_blank(), axis.title.y = element_blank()) +
   xlim(c(ymd_hms('2016-05-19 00:00:00'), ymd_hms('2017-12-20 00:00:00')))
   # theme(legend.position = c(0.9, 0.85))
@@ -53,22 +53,22 @@ vr2ar <- anti_join(vr2ar, data.trim) %>%
   filter(Description == 'Average temperature')%>%
   mutate(Date.Time = ymd_hms(Date.Time),
          temp = as.numeric(Data),
-         Region = 'Lower') %>%
-  group_by(Date.Time, Region) %>%
+         region = 'Lower') %>%
+  group_by(Date.Time, region) %>%
   summarize(avg.temp = mean(temp, na.rm = T))
 
 ## Albany USGS Temperature
 alb <- read.csv('p:/obrien/biotelemetry/hudson sb/albanytemp.csv')
 alb <- mutate(alb, date.time = ymd_hms(date.time),
          Date.Time = ceiling_date(date.time, unit = 'hours'),
-         Region = 'Upper') %>%
-  group_by(Date.Time, Region) %>%
+         region = 'Upper') %>%
+  group_by(Date.Time, region) %>%
   summarize(avg.temp = mean(value, na.rm = T))
 
 temp.data <- rbind(vr2ar, alb)
 
 temperature.plot <- ggplot() +
-  geom_line(data = temp.data, aes(x = Date.Time, y = avg.temp, color = Region)) +
+  geom_line(data = temp.data, aes(x = Date.Time, y = avg.temp, color = region)) +
   labs(y = 'Temp') +
   theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
         axis.title.x = element_blank()) +

@@ -13,7 +13,7 @@ agg_detects <- filter(detects,
                            levels = c('Above', 'Saugerties-Coxsackie', 'Between',
                                       'West Point-Newburgh', 'Below'))) %>%
   group_by(week, Region, arr.fac) %>%
-  distinct(Transmitter) %>%
+  distinct(transmitter) %>%
   summarize(count = n())
 
 ggplot() + geom_step(data = agg_detects,
@@ -33,7 +33,7 @@ detects <- left_join(detects, rec_rkm, by = 'station')
 agg_rkm <- filter(detects, !is.na(date.local)) %>%
   mutate(day = ceiling_date(date.local, unit = 'day'))
 
-ggplot() + geom_raster(data = agg_rkm, aes(x = day, y = Transmitter,
+ggplot() + geom_raster(data = agg_rkm, aes(x = day, y = transmitter,
                                            fill = rkm)) +
   scale_fill_gradient(low = 'blue', high = 'orange') +
   scale_x_datetime(limits = c(ymd_hms('2016-04-19 00:00:00'),
