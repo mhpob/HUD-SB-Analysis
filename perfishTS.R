@@ -102,48 +102,54 @@ ggplot() +
 
 # Padded data ----
 agg.pad.spl <- split(agg.pos, agg.pos$transmitter)
-hud.date.seq <- range(hud$date.floor)
-hud.date.seq <- seq(hud.date.seq[1] - days(2), hud.date.seq[2] + days(2),
-                    by = 'day')
-agg.pad.spl <- lapply(agg.pad.spl, function(x){
-  hold <- data.frame(date.floor = hud.date.seq,
-                     transmitter = x$transmitter[1])
-  suppressWarnings(suppressMessages(
-    hold <- x %>%
-      full_join(hold) %>%
-      arrange(date.floor) %>%
-      mutate(avg.pad = lat.avg,
-             max.pad = lat.max)
-  ))
+agg.pad.spl <- lapply(agg.pad.spl, function(x) split(x, x$year))
+hud.doy.seq <- range(hud$doy)
+hud.doy.seq <- seq(hud.doy.seq[1] - 2, hud.doy.seq[2] + 2, by = 1)
+agg.pad.spl <- lapply(agg.pad.spl, function(y){
+  lapply(y, function(x){
+    hold <- data.frame(doy = hud.doy.seq,
+                       transmitter = x$transmitter[1],
+                       year = x$year[1])
+    suppressWarnings(suppressMessages(
+      hold <- x %>%
+        full_join(hold) %>%
+        arrange(doy) %>%
+        mutate(avg.pad = lat.avg,
+               max.pad = lat.max)
+    ))
 
-  hold[hold$date.floor %in%
-         c(seq(min(hud.date.seq), min(x$date.floor) - days(2), by = 'day'),
-           seq(max(x$date.floor) + days(2), max(hud.date.seq), by = 'day')),
-       ]$avg.pad <- 40.85
-  hold[hold$date.floor %in%
-         c(seq(min(hud.date.seq), min(x$date.floor) - days(2), by = 'day'),
-           seq(max(x$date.floor) + days(2), max(hud.date.seq), by = 'day')),
-       ]$max.pad <- 40.85
+    hold[hold$doy %in%
+           c(seq(min(hud.doy.seq), min(x$doy) - 2, by = 1),
+             seq(max(x$doy) + 2, max(hud.doy.seq), by = 1)),
+         ]$avg.pad <- 40.85
+    hold[hold$doy %in%
+           c(seq(min(hud.doy.seq), min(x$doy) - 2, by = 1),
+             seq(max(x$doy) + 2, max(hud.doy.seq), by = 1)),
+         ]$max.pad <- 40.85
 
-  hold$avg.imp <- na.ma(hold$avg.pad, k = 2)
-  hold$max.imp <- na.ma(hold$max.pad, k = 2)
-  hold
+    hold$avg.imp <- na.ma(hold$avg.pad, k = 2)
+    hold$max.imp <- na.ma(hold$max.pad, k = 2)
+    hold
+  })
 })
 
-agg.pad.imp <- do.call(rbind, agg.pad.spl)
+agg.pad.imp <- lapply(agg.pad.spl, function(x) do.call(rbind, x))
+agg.pad.imp <- do.call(rbind, agg.pad.imp)
 
 # Mean daily imputed padded latitude
 # ggplot() +
-#   annotate('rect', xmin = as.POSIXct('2017-04-01'),
-#            xmax = as.POSIXct('2017-06-24'),
+#   annotate('rect', xmin = yday('2017-04-01'),
+#            xmax = yday('2017-06-24'),
 #            ymin = 42.07, ymax = 42.36, fill = 'pink') +
-#   annotate('rect', xmin = as.POSIXct('2017-04-01'),
-#            xmax = as.POSIXct('2017-06-24'),
+#   annotate('rect', xmin = yday('2017-04-01'),
+#            xmax = yday('2017-06-24'),
 #            ymin = 41.32, ymax = 41.52, fill = 'lightblue') +
-#   geom_point(data = agg.pad.imp, aes(x = date.floor, y = avg.imp), col = 'black') +
-#   geom_point(data = agg.pad.imp, aes(x = date.floor, y = lat.avg), col = 'red') +
+#   geom_point(data = agg.pad.imp, aes(x = doy, y = avg.imp, group = year),
+#              col = 'black') +
+#   geom_point(data = agg.pad.imp, aes(x = doy, y = lat.avg, group = year),
+#              col = 'red') +
 #   facet_wrap(~ transmitter)
 
 
 # Remove some things to clear up memory when being sourced ----
-rm(agg.pad.spl, agg.pos, agg.pos.spl, all, hud, hud.date.seq)
+rm(agg.pad.spl, agg.pos, agg.pos.spl, all, hud, hud.doy.seq)
