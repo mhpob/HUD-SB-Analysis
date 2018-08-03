@@ -8,11 +8,21 @@ source('perfishTS.R')
 # test <- split(agg.pad.imp, agg.pad.imp$transmitter)
 
 # Put time series into rows ----
-r_series <- reshape2::dcast(agg.pad.imp, transmitter ~ date.floor, value.var = 'avg.imp')
-row.names(r_series) <- r_series$transmitter
-r_series <- as.matrix(r_series[, -1])
+r_series <- reshape2::dcast(agg.pad.imp, transmitter + year ~ doy,
+                            value.var = 'avg.imp')
 
+# Separate years
+r_series17 <- r_series[r_series$year == 2017,]
+row_ts <- function(data, year){
+  hold <- data[data$year == year,]
+  row.names(hold) <- hold$transmitter
+  as.matrix(hold[, !names(hold) %in% c('transmitter', 'year')])
+}
 
+r_series17 <- row_ts(r_series, 2017)
+r_series18 <- row_ts(r_series, 2018)
+
+# Custom function to run cluster and plot
 clus.eval <- function(data, n, dist, cent, window){
   clus <- tsclust(series = data, k = n, distance = dist, centroid = cent,
                   window.size = window, trace = T,
@@ -21,19 +31,21 @@ clus.eval <- function(data, n, dist, cent, window){
 
   print(clus)
 
-  plot(clus) + ylim(40.8, 42.75) +
+  plot_clus <- plot(clus, plot = F) +
+    ylim(40.8, 42.75) +
     annotate('rect', xmin = 0, xmax = 86,
              ymin = 42.07, ymax = 42.36, fill = 'pink', alpha = 0.4) +
     annotate('rect', xmin = 0, xmax = 86,
              ymin = 41.32, ymax = 41.52, fill = 'lightblue', alpha = 0.4)
+  plot(plot_clus)
 
   clus
 }
 
-c2 <- clus.eval(r_series, 2, 'dtw_basic', 'median', '7')
-c3 <- clus.eval(r_series, 3, 'dtw_basic', 'median', '7')
-c4 <- clus.eval(r_series, 4, 'dtw_basic', 'median', '7')
-c5 <- clus.eval(r_series, 5, 'dtw_basic', 'median', '7')
+c2 <- clus.eval(r_series18, 2, 'dtw_basic', 'median', '7')
+c3 <- clus.eval(r_series18, 3, 'dtw_basic', 'median', '7')
+c4 <- clus.eval(r_series18, 4, 'dtw_basic', 'median', '7')
+c5 <- clus.eval(r_series18, 5, 'dtw_basic', 'median', '7')
 
 sapply(list(K2 = c2, K3 = c3, K4 = c4, K5 = c5), cvi,
        type = 'internal')
