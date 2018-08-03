@@ -2,17 +2,36 @@
 
 # Replicate n number of times. Save results in a list.
 # To do: switch to parSapply
-j <- replicate(n = 100,
-               tsclust(series = r_series18, k = 3, distance = 'dtw_basic',
-                       centroid = 'median',
-                       window.size = 7, trace = F,
-                       control = partitional_control(pam.precompute = FALSE,
-                                                     iter.max = 500)),
-               simplify = F)
+library(parallel)
+cl <- makeCluster(detectCores() - 1)
+clusterEvalQ(cl, library(dtwclust))
+clusterExport(cl, 'r_series18')
+j <- parSapply(cl, 1:1000, function(i){
+  tsclust(series = r_series18, k = 3, distance = 'dtw_basic',
+          centroid = 'median',
+          window.size = 7, trace = F,
+          control = partitional_control(pam.precompute = FALSE,
+                                        iter.max = 500))
+})
+stopCluster(cl)
+
+# Remove clusters with only one time series
+p <- sapply(j, function(x){1 %in% x@clusinfo$size})
+j <- j[!p]
+
+# Remove clusters that are equal
+q <- t(combn(1:length(j), 2))
+g <- apply(q, 1, function(x) setequal(j[[x[1]]]@clusinfo, j[[x[2]]]@clusinfo))
+# g <- outer(q[,1], q[,2],
+#            FUN = function(x, y){setequal(j[[x]]$clusinfo, j[[y]]$clusinfo)})
+q <- cbind(q, g)
+q <- q[q[, 3] == 1,]
+qq <- filter(data.frame(q), !V1 %in% V2) %>% group_by(V1) %>% summarise(n())
+q <- j[!q[,1] %in% q[, 2]]
 
 # Evaluate CVIs for each run, combine list into one data set.
-k <- j %>%
-  lapply(cvi) %>%
+k <- q %>%
+  lapply(cvi, type = c('Sil', 'D', 'COP', 'DBstar', 'CH', 'SF')) %>%
   lapply(t) %>%
   do.call(rbind, .)
 
@@ -23,9 +42,9 @@ kmax <- k %>%
   apply(., 2,
         function(x) ifelse(x == max(x), 1, 0))
 
-# DB, DBstar, and COP are to be minimized
+# DBstar, and COP are to be minimized
 kmin <- k %>%
-  .[, c('DB', 'DBstar', 'COP')] %>%
+  .[, c('DBstar', 'COP')] %>%
   apply(., 2,
         function(x) ifelse(x == min(x), 1, 0))
 
