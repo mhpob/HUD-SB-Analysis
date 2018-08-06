@@ -1,49 +1,54 @@
-library(parallel); library(dplyr)
+TS_select <- function(ts_data){
+  library(parallel); library(dplyr)
 
-# Replicate n number of times. Save results in a list.
-cl <- makeCluster(detectCores() - 1)
-clusterEvalQ(cl, library(dtwclust))
-clusterExport(cl, 'r_series18')
+  # Replicate n number of times. Save results in a list.
+  cat('Replicating... \n')
+  cl <- makeCluster(detectCores() - 1)
+  clusterEvalQ(cl, library(dtwclust))
+  clusterExport(cl, 'ts_data', envir = environment())
 
-all_results <- parSapply(cl, 1:100, function(i){
-  tsclust(series = r_series18, k = 3, distance = 'dtw_basic',
-          centroid = 'median',
-          window.size = 7, trace = F,
-          control = partitional_control(pam.precompute = FALSE,
-                                        iter.max = 500))
-})
-stopCluster(cl)
+  all_results <- parSapply(cl, 1:100, function(i){
+    tsclust(series = ts_data, k = 3, distance = 'dtw_basic',
+            centroid = 'median',
+            window.size = 7, trace = F,
+            control = partitional_control(pam.precompute = FALSE,
+                                          iter.max = 500))
+  })
 
-# Remove clusters with only one time series
-trim_results <- sapply(all_results, function(x){1 %in% x@clusinfo$size})
-trim_results <- all_results[!trim_results]
+  stopCluster(cl)
 
-# Remove clusters that are equal
-combos <- t(combn(1:length(trim_results), 2))
+  # Remove clusters with only one time series
+  cat('Trimming... \n')
+  trim_results <- sapply(all_results, function(x){1 %in% x@clusinfo$size})
+  trim_results <- all_results[!trim_results]
 
-combos_equal <- apply(combos, 1, function(x){
-  # Need to use dplyr::setequal. Won't work with base::setequal
-  dplyr::setequal(trim_results[[x[1]]]@clusinfo, trim_results[[x[2]]]@clusinfo)
-})
+  # Remove clusters that are equal
+  combos <- t(combn(1:length(trim_results), 2))
 
-combos <- cbind(combos, combos_equal)
+  combos_equal <- apply(combos, 1, function(x){
+    # Need to use dplyr::setequal. Won't work with base::setequal
+    dplyr::setequal(trim_results[[x[1]]]@clusinfo, trim_results[[x[2]]]@clusinfo)
+  })
 
-# Note: The below has a side-effect of dropping unique solutions
-# Okay with this, as a unique solution out of 1 << reps should have little support
-combos <- combos[combos[, 3] == 1,]
-combos <- combos[!combos[, 1] %in% combos[, 2],]
+  combos <- cbind(combos, combos_equal)
 
-run_freq <- combos %>%
-  data.frame %>%
-  group_by(V1) %>%
-  summarize(n()) %>%
-  rename(index = V1, n = `n()`) %>%
-  mutate(index = row.names(run_freq))
-trim_results <- trim_results[unique(combos[,1])]
+  # Note: The below has a side-effect of dropping unique solutions
+  # Okay with this, as a unique solution out of 1 << reps should have little support
+  combos <- combos[combos[, 3] == 1,]
+  combos <- combos[!combos[, 1] %in% combos[, 2],]
 
-# join
-list(trim_results, run_freq)
+  cat('Summarizing... \n')
+  run_freq <- combos %>%
+    data.frame %>%
+    group_by(V1) %>%
+    summarize(n()) %>%
+    rename(index = V1, n = `n()`) %>%
+    mutate(index = row.names(.))
+  trim_results <- trim_results[unique(combos[,1])]
 
+  # join
+  list(trim_results, run_freq)
+}
 
 ## Orignially thought to run CVIs for each  output ----
 ## However, this leads to some strange behavior (over-emphasis on fewer trends)
