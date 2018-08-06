@@ -5,58 +5,70 @@
 library(parallel)
 cl <- makeCluster(detectCores() - 1)
 clusterEvalQ(cl, library(dtwclust))
+clusterEvalQ(cl, library(dplyr))
 clusterExport(cl, 'r_series18')
-j <- parSapply(cl, 1:1000, function(i){
+all_results <- parSapply(cl, 1:25, function(i){
   tsclust(series = r_series18, k = 3, distance = 'dtw_basic',
           centroid = 'median',
           window.size = 7, trace = F,
           control = partitional_control(pam.precompute = FALSE,
                                         iter.max = 500))
 })
-stopCluster(cl)
+
 
 # Remove clusters with only one time series
-p <- sapply(j, function(x){1 %in% x@clusinfo$size})
-j <- j[!p]
+trim_results <- sapply(all_results, function(x){1 %in% x@clusinfo$size})
+trim_results <- all_results[!trim_results]
 
 # Remove clusters that are equal
-q <- t(combn(1:length(j), 2))
-g <- apply(q, 1, function(x) setequal(j[[x[1]]]@clusinfo, j[[x[2]]]@clusinfo))
-# g <- outer(q[,1], q[,2],
-#            FUN = function(x, y){setequal(j[[x]]$clusinfo, j[[y]]$clusinfo)})
-q <- cbind(q, g)
-q <- q[q[, 3] == 1,]
-qq <- filter(data.frame(q), !V1 %in% V2) %>% group_by(V1) %>% summarise(n())
-q <- j[!q[,1] %in% q[, 2]]
+combos <- t(combn(1:length(trim_results), 2))
+
+clusterExport(cl, 'trim_results')
+clusterExport(cl, 'combos')
+combos_equal <- parApply(cl, combos, 1, function(x){
+  dplyr::setequal(trim_results[[x[1]]]@clusinfo, trim_results[[x[2]]]@clusinfo)
+})
+stopCluster(cl)
+# q is switching to combos
+combos <- cbind(combos, combos_equal)
+
+# Note: The below has a side-effect of dropping unique solutions
+# Okay with this, as a unique solution out of 1 << reps should have little support
+combos <- combos[combos[, 3] == 1,]
+combos <- combos[!combos[, 1] %in% combos[, 2],]
+
+run_freq <- group_by(data.frame(combos), V1) %>% summarise(n())
+trim_results <- trim_results[unique(combos[,1])]
 
 # Evaluate CVIs for each run, combine list into one data set.
-k <- q %>%
+cvis <- trim_results %>%
   lapply(cvi, type = c('Sil', 'D', 'COP', 'DBstar', 'CH', 'SF')) %>%
   lapply(t) %>%
   do.call(rbind, .)
 
 # Convert CVIs to 1 if == min/max (depending on index) and 0 otherwise.
 # Sil, SF, CH, and D are to be maximized
-kmax <- k %>%
+cvimax <- cvis %>%
   .[, c('Sil', 'SF', 'CH', 'D')] %>%
   apply(., 2,
         function(x) ifelse(x == max(x), 1, 0))
 
 # DBstar, and COP are to be minimized
-kmin <- k %>%
+cvimin <- cvis %>%
   .[, c('DBstar', 'COP')] %>%
   apply(., 2,
         function(x) ifelse(x == min(x), 1, 0))
 
 # Sum across rows (i.e., for each run) to find the run with the greatest number
 # of "winning" indices
-k <- cbind(kmax, kmin) %>%
+cvis <- cbind(cvimax, cvimin) %>%
   data.frame %>%
-  mutate(wins = rowSums(.))
+  mutate(wins = rowSums(.)) %>%
+  cbind(cvis)
 
 # Select the run with the greatest number of CVI "wins".
-l <- j[which(k$wins == max(k$wins))]
+best_fit <- trim_results[which(cvis$wins == max(cvis$wins))]
 
 # inspect
-l
-plot(l)
+best_fit
+plot(best_fit)
