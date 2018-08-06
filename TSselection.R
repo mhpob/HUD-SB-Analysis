@@ -1,20 +1,18 @@
-
+library(parallel); library(dplyr)
 
 # Replicate n number of times. Save results in a list.
-# To do: switch to parSapply
-library(parallel)
 cl <- makeCluster(detectCores() - 1)
 clusterEvalQ(cl, library(dtwclust))
-clusterEvalQ(cl, library(dplyr))
 clusterExport(cl, 'r_series18')
-all_results <- parSapply(cl, 1:25, function(i){
+
+all_results <- parSapply(cl, 1:100, function(i){
   tsclust(series = r_series18, k = 3, distance = 'dtw_basic',
           centroid = 'median',
           window.size = 7, trace = F,
           control = partitional_control(pam.precompute = FALSE,
                                         iter.max = 500))
 })
-
+stopCluster(cl)
 
 # Remove clusters with only one time series
 trim_results <- sapply(all_results, function(x){1 %in% x@clusinfo$size})
@@ -23,13 +21,11 @@ trim_results <- all_results[!trim_results]
 # Remove clusters that are equal
 combos <- t(combn(1:length(trim_results), 2))
 
-clusterExport(cl, 'trim_results')
-clusterExport(cl, 'combos')
-combos_equal <- parApply(cl, combos, 1, function(x){
+combos_equal <- apply(combos, 1, function(x){
+  # Need to use dplyr::setequal. Won't work with base::setequal
   dplyr::setequal(trim_results[[x[1]]]@clusinfo, trim_results[[x[2]]]@clusinfo)
 })
-stopCluster(cl)
-# q is switching to combos
+
 combos <- cbind(combos, combos_equal)
 
 # Note: The below has a side-effect of dropping unique solutions
@@ -37,12 +33,16 @@ combos <- cbind(combos, combos_equal)
 combos <- combos[combos[, 3] == 1,]
 combos <- combos[!combos[, 1] %in% combos[, 2],]
 
-run_freq <- group_by(data.frame(combos), V1) %>% summarise(n())
+run_freq <- combos %>%
+  data.frame %>%
+  group_by(V1) %>%
+  summarize(n()) %>%
+  rename(index = V1, n = `n()`) %>%
+  mutate(index = row.names(run_freq))
 trim_results <- trim_results[unique(combos[,1])]
 
-# inspect
-best_fit
-plot(best_fit)
+# join
+list(trim_results, run_freq)
 
 
 ## Orignially thought to run CVIs for each  output ----
