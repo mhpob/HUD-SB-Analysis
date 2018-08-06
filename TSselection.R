@@ -40,35 +40,43 @@ combos <- combos[!combos[, 1] %in% combos[, 2],]
 run_freq <- group_by(data.frame(combos), V1) %>% summarise(n())
 trim_results <- trim_results[unique(combos[,1])]
 
-# Evaluate CVIs for each run, combine list into one data set.
-cvis <- trim_results %>%
-  lapply(cvi, type = c('Sil', 'D', 'COP', 'DBstar', 'CH', 'SF')) %>%
-  lapply(t) %>%
-  do.call(rbind, .)
-
-# Convert CVIs to 1 if == min/max (depending on index) and 0 otherwise.
-# Sil, SF, CH, and D are to be maximized
-cvimax <- cvis %>%
-  .[, c('Sil', 'SF', 'CH', 'D')] %>%
-  apply(., 2,
-        function(x) ifelse(x == max(x), 1, 0))
-
-# DBstar, and COP are to be minimized
-cvimin <- cvis %>%
-  .[, c('DBstar', 'COP')] %>%
-  apply(., 2,
-        function(x) ifelse(x == min(x), 1, 0))
-
-# Sum across rows (i.e., for each run) to find the run with the greatest number
-# of "winning" indices
-cvis <- cbind(cvimax, cvimin) %>%
-  data.frame %>%
-  mutate(wins = rowSums(.)) %>%
-  cbind(cvis)
-
-# Select the run with the greatest number of CVI "wins".
-best_fit <- trim_results[which(cvis$wins == max(cvis$wins))]
-
 # inspect
 best_fit
 plot(best_fit)
+
+
+## Orignially thought to run CVIs for each  output ----
+## However, this leads to some strange behavior (over-emphasis on fewer trends)
+## Found it to be better to just pick those that emerge most-often. Keeping this
+## code here because I worked hard on it, and something of the sort could be useful
+## later. If used, this should go as the step after counting how many fits were
+## repeated.
+
+# Evaluate CVIs for each run, combine list into one data set.
+# cvis <- trim_results %>%
+#   lapply(cvi, type = c('Sil', 'D', 'COP', 'DBstar', 'CH', 'SF')) %>%
+#   lapply(t) %>%
+#   do.call(rbind, .)
+
+# Convert CVIs to 1 if == min/max (depending on index) and 0 otherwise.
+# Sil, SF, CH, and D are to be maximized
+# cvimax <- cvis %>%
+#   .[, c('Sil', 'SF', 'CH', 'D')] %>%
+#   apply(., 2,
+#         function(x) ifelse(x == max(x), 1, 0))
+
+# DBstar, and COP are to be minimized
+# cvimin <- cvis %>%
+#   .[, c('DBstar', 'COP')] %>%
+#   apply(., 2,
+#         function(x) ifelse(x == min(x), 1, 0))
+
+# Sum across rows (i.e., for each run) to find the run with the greatest number
+# of "winning" indices
+# cvis <- cbind(cvimax, cvimin) %>%
+#   data.frame %>%
+#   mutate(wins = rowSums(.)) %>%
+#   cbind(cvis)
+
+# Select the run with the greatest number of CVI "wins".
+# best_fit <- trim_results[which(cvis$wins == max(cvis$wins))]
