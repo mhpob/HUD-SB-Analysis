@@ -22,53 +22,78 @@ row_ts <- function(data, year){
 r_series17 <- row_ts(r_series, 2017)
 r_series18 <- row_ts(r_series, 2018)
 
-# Custom function to run cluster and plot
-clus.eval <- function(data, n, dist, cent, window){
-  clus <- tsclust(series = data, k = n, distance = dist, centroid = cent,
-                  window.size = window, trace = T,
-                  control = partitional_control(pam.precompute = FALSE,
-                                                iter.max = 500))
+# Cluster multiple times and pick the most frequent ----
+source('TS_select.R')
 
-  print(clus)
-
-  plot_clus <- plot(clus, plot = F) +
+selections <- function(n_clust){
+  temp <- lapply(list(r_series17, r_series18),
+                 TS_select, reps = 1000, n_clusters = n_clust, dist = 'dtw_basic',
+                 cent = 'median', window = '7')
+  temp <- setNames(temp, c('r_series17', 'r_series18'))
+  temp
+}
+winner <- function(ts_obj, year){
+  yr <- ifelse(year == 2017, 'r_series17', 'r_series18')
+  ts_obj[[yr]][['results']][[which.max(ts_obj[[yr]][['key']]$n)]]
+}
+clusterplot <- function(win_data){
+  plot(win_data, plot = F) +
     ylim(40.8, 42.75) +
     annotate('rect', xmin = 0, xmax = 86,
              ymin = 42.07, ymax = 42.36, fill = 'pink', alpha = 0.4) +
     annotate('rect', xmin = 0, xmax = 86,
              ymin = 41.32, ymax = 41.52, fill = 'lightblue', alpha = 0.4)
-  plot(plot_clus)
-
-  clus
 }
 
-c2 <- clus.eval(r_series18, 2, 'dtw_basic', 'median', '7')
-c3 <- clus.eval(r_series18, 3, 'dtw_basic', 'median', '7')
-c4 <- clus.eval(r_series18, 4, 'dtw_basic', 'median', '7')
-c5 <- clus.eval(r_series18, 5, 'dtw_basic', 'median', '7')
+c2 <- selections(2)
+c2_17 <- winner(c2, 2017)
+c2_18 <- winner(c2, 2018)
 
-sapply(list(K2 = c2, K3 = c3, K4 = c4, K5 = c5), cvi,
+clusterplot(c4_17)
+
+c3 <- selections(3)
+c3_17 <- winner(c3, 2017)
+c3_18 <- winner(c3, 2018)
+
+c4 <- selections(4)
+c4_17 <- winner(c4, 2017)
+c4_18 <- winner(c4, 2018)
+
+c5 <- selections(5)
+c5_17 <- winner(c5, 2017)
+c5_18 <- winner(c5, 2018)
+
+# 2017 CVIs: 2 votes for 2 and 4 clusters, 1 for 5 and 3
+sapply(list(K2 = c2_17, K3 = c3_17, K4 = c4_17, K5 = c5_17), cvi,
+       type = 'internal')
+# 2018 CVIs: 4 for 5, 1 for 3 and 4
+sapply(list(K2 = c2_18, K3 = c3_18, K4 = c4_18, K5 = c5_18), cvi,
        type = 'internal')
 
-cents <- data.frame(cent = rep(c('Centroid 1', 'Centroid 2'), each = 86),
-                    value = c(c2@centroids[[1]], c2@centroids[[2]]),
-                    date = rep(unique(agg.pad.imp$date.floor), times = 2))
 
-TS <- data.frame(TS = do.call(c, c2@datalist),
-                 trans = rep(names(c2@datalist), each = 86),
-                 date = rep(unique(agg.pad.imp$date.floor), times = 66),
-                 cent = paste0('Centroid ', rep(c2@cluster, each = 86))) %>%
-  left_join(distinct(detects, transmitter, Sex), by = c('trans' = 'transmitter'))
+# 2 clusters ----
+cents <- data.frame(cent = rep(c('Centroid 1', 'Centroid 2'), each = 86),
+                    value = c(c2[[1]][[3]]@centroids[[1]],
+                              c2[[1]][[3]]@centroids[[2]]),
+                    date = rep(unique(agg.pad.imp$doy), times = 2))
+
+TS <- data.frame(TS = do.call(c, c2[[1]][[3]]@datalist),
+                 trans = rep(names(c2[[1]][[3]]@datalist), each = 86),
+                 date = rep(unique(agg.pad.imp$doy), times = 40),
+                 cent = paste0('Centroid ', rep(c2[[1]][[3]]@cluster,
+                                                each = 86))) %>%
+  left_join(distinct(agg.pad.imp, transmitter, sex),
+            by = c('trans' = 'transmitter'))
 
 ggplot(cents) +
   facet_wrap(~cent) + ylim(40.8, 42.75) +
-  annotate('rect', xmin = ymd_hms('2017-04-02 00:00:00'),
-           xmax = ymd_hms('2017-06-24 00:00:00'),
+  annotate('rect', xmin = min(agg.pad.imp$doy),
+           xmax = max(agg.pad.imp$doy),
            ymin = 42.07, ymax = 42.36, fill = 'pink') +
-  annotate('rect', xmin = ymd_hms('2017-04-02 00:00:00'),
-           xmax = ymd_hms('2017-06-24 00:00:00'),
+  annotate('rect', xmin = min(agg.pad.imp$doy),
+           xmax = max(agg.pad.imp$doy),
            ymin = 41.32, ymax = 41.52, fill = 'lightblue') +
-  geom_line(data = TS, aes(x = date, y = TS, group = trans, color = Sex)) +
+  geom_line(data = TS, aes(x = date, y = TS, group = trans), color = 'gray') +
   geom_line(aes(x = date, y = value), lwd = 1.5) +
   labs(x = NULL, y = 'Latitude') +
   theme_bw()
@@ -83,6 +108,8 @@ TS <- data.frame(TS = do.call(c, c4@datalist),
                  date = rep(unique(agg.pad.imp$date.floor), times = 66),
                  cent = paste0('Centroid ', rep(c4@cluster, each = 86))) %>%
   left_join(distinct(detects, transmitter, Sex), by = c('trans' = 'transmitter'))
+
+
 
 #
 temp <- data.frame(transmitter = names(c2@datalist), cluster = c2@cluster) %>%
