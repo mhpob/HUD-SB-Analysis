@@ -63,6 +63,8 @@ c5 <- selections(5)
 c5_17 <- winner(c5, 2017)
 c5_18 <- winner(c5, 2018)
 
+
+
 # 2017 CVIs: 2 votes for 2 and 4 clusters, 1 for 5 and 3
 sapply(list(K2 = c2_17, K3 = c3_17, K4 = c4_17, K5 = c5_17), cvi,
        type = 'internal')
@@ -71,48 +73,70 @@ sapply(list(K2 = c2_18, K3 = c3_18, K4 = c4_18, K5 = c5_18), cvi,
        type = 'internal')
 
 
-# 2 clusters ----
-cents <- data.frame(cent = rep(c('Centroid 1', 'Centroid 2'), each = 86),
-                    value = c(c2[[1]][[3]]@centroids[[1]],
-                              c2[[1]][[3]]@centroids[[2]]),
-                    date = rep(unique(agg.pad.imp$doy), times = 2))
+# Clean plotting ----
+cleanplot <- function(dat, highlight = NULL){
+  ncentroids <- as.numeric(substr(dat, 2, 2))
+  nseries <- ifelse(substr(dat, 4, 6) == '17', 66, 40)
 
-TS <- data.frame(TS = do.call(c, c2[[1]][[3]]@datalist),
-                 trans = rep(names(c2[[1]][[3]]@datalist), each = 86),
-                 date = rep(unique(agg.pad.imp$doy), times = 40),
-                 cent = paste0('Centroid ', rep(c2[[1]][[3]]@cluster,
-                                                each = 86))) %>%
-  left_join(distinct(agg.pad.imp, transmitter, sex),
-            by = c('trans' = 'transmitter'))
+  cents <- data.frame(cent = rep(paste('Centroid', 1:ncentroids, sep = ' '),
+                                 each = 86),
+                      value = do.call(c, get(dat)@centroids),
+                      date = rep(unique(agg.pad.imp$doy), times = ncentroids))
+  TS <- data.frame(TS = do.call(c, get(dat)@datalist),
+                   trans = rep(names(get(dat)@datalist), each = 86),
+                   date = rep(unique(agg.pad.imp$doy), times = nseries),
+                   cent = paste0('Centroid ', rep(get(dat)@cluster, each = 86))) %>%
+    left_join(distinct(agg.pad.imp, transmitter, sex),
+              by = c('trans' = 'transmitter'))
 
-ggplot(cents) +
-  facet_wrap(~cent) + ylim(40.8, 42.75) +
-  annotate('rect', xmin = min(agg.pad.imp$doy),
-           xmax = max(agg.pad.imp$doy),
-           ymin = 42.07, ymax = 42.36, fill = 'pink') +
-  annotate('rect', xmin = min(agg.pad.imp$doy),
-           xmax = max(agg.pad.imp$doy),
-           ymin = 41.32, ymax = 41.52, fill = 'lightblue') +
-  geom_line(data = TS, aes(x = date, y = TS, group = trans), color = 'gray') +
-  geom_line(aes(x = date, y = value), lwd = 1.5) +
-  labs(x = NULL, y = 'Latitude') +
-  theme_bw()
-
-# 4 Clusters
-cents <- data.frame(cent = rep(paste('Centroid', 1:4, sep = ' '), each = 86),
-                    value = do.call(c, c4@centroids),
-                    date = rep(unique(agg.pad.imp$date.floor), times = 4))
-
-TS <- data.frame(TS = do.call(c, c4@datalist),
-                 trans = rep(names(c4@datalist), each = 86),
-                 date = rep(unique(agg.pad.imp$date.floor), times = 66),
-                 cent = paste0('Centroid ', rep(c4@cluster, each = 86))) %>%
-  left_join(distinct(detects, transmitter, Sex), by = c('trans' = 'transmitter'))
+  if(!is.null(highlight)){
+    TS_highlight <- TS[TS$trans %in% highlight,]
 
 
+    ggplot(cents) +
+      facet_wrap(~cent) + ylim(40.8, 42.75) +
+      annotate('rect', xmin = min(agg.pad.imp$doy),
+               xmax = max(agg.pad.imp$doy),
+               ymin = 42.07, ymax = 42.36, fill = 'pink') +
+      annotate('rect', xmin = min(agg.pad.imp$doy),
+               xmax = max(agg.pad.imp$doy),
+               ymin = 41.32, ymax = 41.52, fill = 'lightblue') +
+      geom_line(data = TS, aes(x = date, y = TS, group = trans), color = 'gray') +
+      geom_line(aes(x = date, y = value), lwd = 1.5) +
+      geom_line(data = TS_highlight, aes(x = date, y = TS, group = trans),
+                color = 'red') +
+      labs(x = NULL, y = 'Latitude') +
+      theme_bw()
 
-#
-temp <- data.frame(transmitter = names(c2@datalist), cluster = c2@cluster) %>%
+  }else{
+    ggplot(cents) +
+      facet_wrap(~cent) + ylim(40.8, 42.75) +
+      annotate('rect', xmin = min(agg.pad.imp$doy),
+               xmax = max(agg.pad.imp$doy),
+               ymin = 42.07, ymax = 42.36, fill = 'pink') +
+      annotate('rect', xmin = min(agg.pad.imp$doy),
+               xmax = max(agg.pad.imp$doy),
+               ymin = 41.32, ymax = 41.52, fill = 'lightblue') +
+      geom_line(data = TS, aes(x = date, y = TS, group = trans), color = 'gray') +
+      geom_line(aes(x = date, y = value), lwd = 1.5) +
+      labs(x = NULL, y = 'Latitude') +
+      theme_bw()
+  }
+
+
+}
+
+cleanplot('c4_17')
+
+temp <- data.frame(transmitter = names(c5_18@datalist), cluster = c5_18@cluster)
+p <- filter(temp, cluster == 5)
+cleanplot('c4_17', highlight = p$transmitter)
+
+
+
+
+
+temp <- data.frame(transmitter = names(c5_18@datalist), cluster = c5_18@cluster)%>%
   left_join(distinct(detects, transmitter, region)) %>%
   mutate(cluster = case_when(cluster == 1 ~ 'West Point-Newburgh',
                              T ~ 'Saugerties-Coxsackie'),
