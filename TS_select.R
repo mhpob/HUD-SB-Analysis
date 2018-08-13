@@ -1,16 +1,17 @@
-TS_select <- function(ts_data){
+TS_select <- function(ts_data, reps, n_clusters, dist, cent, window){
   library(parallel); library(dplyr)
 
   # Replicate n number of times. Save results in a list.
   cat('Replicating... \n')
   cl <- makeCluster(detectCores() - 1)
   clusterEvalQ(cl, library(dtwclust))
-  clusterExport(cl, 'ts_data', envir = environment())
+  clusterExport(cl, c('ts_data', 'n_clusters', 'dist', 'cent', 'window'),
+                envir = environment())
 
-  all_results <- parSapply(cl, 1:100, function(i){
-    tsclust(series = ts_data, k = 3, distance = 'dtw_basic',
-            centroid = 'median',
-            window.size = 7, trace = F,
+  all_results <- parSapply(cl, 1:reps, function(i){
+    tsclust(series = ts_data, k = n_clusters, distance = dist,
+            centroid = cent,
+            window.size = window, trace = F,
             control = partitional_control(pam.precompute = FALSE,
                                           iter.max = 500))
   })
@@ -47,7 +48,7 @@ TS_select <- function(ts_data){
   trim_results <- trim_results[unique(combos[,1])]
 
   # join
-  list(trim_results, run_freq)
+  list(results = trim_results, key = run_freq)
 }
 
 ## Orignially thought to run CVIs for each  output ----
