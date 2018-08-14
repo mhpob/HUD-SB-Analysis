@@ -45,24 +45,27 @@ clusterplot <- function(win_data){
              ymin = 41.32, ymax = 41.52, fill = 'lightblue', alpha = 0.4)
 }
 
-c2 <- selections(2)
+# c2 <- selections(2) #saved as .rda
+c2 <- readRDS('cluster data/c2.rda')
 c2_17 <- winner(c2, 2017)
 c2_18 <- winner(c2, 2018)
 
-clusterplot(c4_17)
+clusterplot(c2_17)
 
-c3 <- selections(3)
+# c3 <- selections(3) #saved as .rda
+c3 <- readRDS('cluster data/c3.rda')
 c3_17 <- winner(c3, 2017)
 c3_18 <- winner(c3, 2018)
 
-c4 <- selections(4)
+# c4 <- selections(4) #saved as .rda
+c4 <- readRDS('cluster data/c4.rda')
 c4_17 <- winner(c4, 2017)
 c4_18 <- winner(c4, 2018)
 
-c5 <- selections(5)
+# c5 <- selections(5)  #saved as .rda
+c5 <- readRDS('cluster data/c5.rda')
 c5_17 <- winner(c5, 2017)
 c5_18 <- winner(c5, 2018)
-
 
 
 # 2017 CVIs: 2 votes for 2 and 4 clusters, 1 for 5 and 3
@@ -74,68 +77,97 @@ sapply(list(K2 = c2_18, K3 = c3_18, K4 = c4_18, K5 = c5_18), cvi,
 
 
 # Clean plotting ----
-cleanplot <- function(dat, highlight = NULL){
+cleanplot <- function(dat, highlight = NULL, highlight_only = F){
   ncentroids <- as.numeric(substr(dat, 2, 2))
   nseries <- ifelse(substr(dat, 4, 6) == '17', 66, 40)
 
   cents <- data.frame(cent = rep(paste('Centroid', 1:ncentroids, sep = ' '),
                                  each = 86),
                       value = do.call(c, get(dat)@centroids),
-                      date = rep(unique(agg.pad.imp$doy), times = ncentroids))
+                      date = rep(unique(agg.pad.imp$doy), times = ncentroids)) %>%
+    mutate(date = as.Date('2017-01-01') + (date - 1))
   TS <- data.frame(TS = do.call(c, get(dat)@datalist),
                    trans = rep(names(get(dat)@datalist), each = 86),
                    date = rep(unique(agg.pad.imp$doy), times = nseries),
-                   cent = paste0('Centroid ', rep(get(dat)@cluster, each = 86))) %>%
-    left_join(distinct(agg.pad.imp, transmitter, sex),
+                   cent = paste0('Centroid ',
+                                 rep(get(dat)@cluster, each = 86))) %>%
+    mutate(date = as.Date('2017-01-01') + (date - 1)) %>%
+    left_join(filter(distinct(ungroup(agg.pad.imp), transmitter, sex),
+                     !is.na(sex)),
               by = c('trans' = 'transmitter'))
+
+  mindate <- as.Date('2017-01-01') + (min(agg.pad.imp$doy) - 1)
+  maxdate <- as.Date('2017-01-01') + (max(agg.pad.imp$doy) - 1)
 
   if(!is.null(highlight)){
     TS_highlight <- TS[TS$trans %in% highlight,]
 
+    if(highlight_only == T){
+      ggplot(cents) +
+        facet_wrap(~cent) + ylim(40.8, 42.75) +
+        annotate('rect',
+                 xmin = mindate,
+                 xmax = maxdate,
+                 ymin = 42.07, ymax = 42.36, fill = 'pink') +
+        annotate('rect',
+                 xmin = mindate,
+                 xmax = maxdate,
+                 ymin = 41.32, ymax = 41.52, fill = 'lightblue') +
+        geom_line(data = TS_highlight, aes(x = date, y = TS, group = trans),
+                  color = 'red') +
+        geom_line(aes(x = date, y = value), lwd = 1.5) +
+        scale_x_date(limits = c(as.Date('2017-04-01'), as.Date('2017-07-01'))) +
+        labs(x = NULL, y = 'Latitude') +
+        theme_bw()
+    } else{
+      ggplot(cents) +
+        facet_wrap(~cent) + ylim(40.8, 42.75) +
+        annotate('rect',
+                 xmin = mindate,
+                 xmax = maxdate,
+                 ymin = 42.07, ymax = 42.36, fill = 'pink') +
+        annotate('rect',
+                 xmin = mindate,
+                 xmax = maxdate,
+                 ymin = 41.32, ymax = 41.52, fill = 'lightblue') +
+        geom_line(data = TS, aes(x = date, y = TS, group = trans), color = 'gray') +
+        geom_line(aes(x = date, y = value), lwd = 1.5) +
+        geom_line(data = TS_highlight, aes(x = date, y = TS, group = trans),
+                  color = 'red') +
+        scale_x_date(limits = c(as.Date('2017-04-01'), as.Date('2017-07-01'))) +
+        labs(x = NULL, y = 'Latitude') +
+        theme_bw()
+    }
 
+  } else{
     ggplot(cents) +
       facet_wrap(~cent) + ylim(40.8, 42.75) +
-      annotate('rect', xmin = min(agg.pad.imp$doy),
-               xmax = max(agg.pad.imp$doy),
+      annotate('rect',
+               xmin = mindate,
+               xmax = maxdate,
                ymin = 42.07, ymax = 42.36, fill = 'pink') +
-      annotate('rect', xmin = min(agg.pad.imp$doy),
-               xmax = max(agg.pad.imp$doy),
+      annotate('rect',
+               xmin = mindate,
+               xmax = maxdate,
                ymin = 41.32, ymax = 41.52, fill = 'lightblue') +
       geom_line(data = TS, aes(x = date, y = TS, group = trans), color = 'gray') +
       geom_line(aes(x = date, y = value), lwd = 1.5) +
-      geom_line(data = TS_highlight, aes(x = date, y = TS, group = trans),
-                color = 'red') +
-      labs(x = NULL, y = 'Latitude') +
-      theme_bw()
-
-  }else{
-    ggplot(cents) +
-      facet_wrap(~cent) + ylim(40.8, 42.75) +
-      annotate('rect', xmin = min(agg.pad.imp$doy),
-               xmax = max(agg.pad.imp$doy),
-               ymin = 42.07, ymax = 42.36, fill = 'pink') +
-      annotate('rect', xmin = min(agg.pad.imp$doy),
-               xmax = max(agg.pad.imp$doy),
-               ymin = 41.32, ymax = 41.52, fill = 'lightblue') +
-      geom_line(data = TS, aes(x = date, y = TS, group = trans), color = 'gray') +
-      geom_line(aes(x = date, y = value), lwd = 1.5) +
+      scale_x_date(limits = c(as.Date('2017-04-01'), as.Date('2017-07-01'))) +
       labs(x = NULL, y = 'Latitude') +
       theme_bw()
   }
-
-
 }
 
-cleanplot('c4_17')
+cleanplot('c2_18')
 
-temp <- data.frame(transmitter = names(c5_18@datalist), cluster = c5_18@cluster)
-p <- filter(temp, cluster == 5)
-cleanplot('c4_17', highlight = p$transmitter)
-
-
+temp <- data.frame(transmitter = names(k2_18@datalist), cluster = k2_18@cluster)
+p <- filter(temp, cluster == 1)
+cleanplot('c2_17', highlight = p$transmitter, highlight_only = T)
 
 
 
+
+## Leftover code I need to sort through ----
 temp <- data.frame(transmitter = names(c5_18@datalist), cluster = c5_18@cluster)%>%
   left_join(distinct(detects, transmitter, region)) %>%
   mutate(cluster = case_when(cluster == 1 ~ 'West Point-Newburgh',
