@@ -158,76 +158,12 @@ cleanplot <- function(dat, highlight = NULL, highlight_only = F){
   }
 }
 
-cleanplot('c2_18')
-
+k2_18 <- c2[[2]][[1]][[1]] #cheating a bit with this
 temp <- data.frame(transmitter = names(k2_18@datalist), cluster = k2_18@cluster)
-p <- filter(temp, cluster == 1)
-cleanplot('c2_17', highlight = p$transmitter, highlight_only = T)
+p <- filter(temp, cluster == 2)
+base_plot <- cleanplot('c2_17', highlight = p$transmitter)
 
-
-
-
-## Leftover code I need to sort through ----
-temp <- data.frame(transmitter = names(c5_18@datalist), cluster = c5_18@cluster)%>%
-  left_join(distinct(detects, transmitter, region)) %>%
-  mutate(cluster = case_when(cluster == 1 ~ 'West Point-Newburgh',
-                             T ~ 'Saugerties-Coxsackie'),
-         correct = case_when(cluster == region ~ T,
-                             T ~ F))
-
-# Correct/Incorrect classification
-temp %>% group_by(region, correct) %>% summarize(n())
-
-
-# slotNames()
-# [1] "iter"      "converged" "clusinfo"  "cldist"    "call"      "family"    "control"   "datalist"
-# [9] "type"      "distance"  "centroid"  "preproc"   "k"         "cluster"   "centroids" "distmat"
-# [17] "proctime"  "dots"      "args"      "seed"
-
-plot.data <- agg.pos.imp %>%
-  ungroup() %>%
-  mutate(transmitter = factor(transmitter,
-                              levels = levels(factor(transmitter))[ord]))
-
-
-ggplot() + geom_raster(data = plot.data, aes(x = date.floor, y = transmitter,
-                                           fill = avg.imp)) +
-  scale_fill_gradient(low = 'blue', high = 'orange') +
-  scale_x_datetime(limits = c(ymd_hms('2017-04-02 00:00:00'),
-                              ymd_hms('2017-06-26 00:00:00'))) +
-  theme_bw() +
-  theme(legend.position = c(0.9, 0.2), axis.title = element_blank(),
-        axis.text.y = element_blank()) +
-  labs(fill = 'River km')
-
-
-
-
-frechet_func <- function(x, y){distFrechet()}
-
-
-
-# kml and kmlShape (which is different from kShape...) ----
-k <- reshape2::dcast(agg.pad.imp, transmitter ~ date.floor, value.var = 'avg.imp')
-row.names(k) <- k$transmitter
-k <- as.matrix(k[, -1])
-
-library(kmlShape)
-
-pr_DB$set_entry(FUN = distFrechet, names = c('Frechet'),
-                loop = T, type = 'metric', distance = T)
-
-
-p <- cldsWide(k, id = rownames(k))
-
-kmlclus <- kmlShape(p, 2, timeScale = 0.03, toPlot = 'none')
-plot(kmlclus, col = 'clusters')
-
-
-
-library(kml)
-
-p <- cld(k, idAll = row.names(k))
-kml(p, parAlgo = parALGO(startingCond = 'maxDist'), toPlot = 'both')
-plot(p)
-
+base_plot +
+  theme(axis.text = element_text(size = 18),
+        axis.title = element_text(size = 18),
+        strip.text = element_text(size = 18))
