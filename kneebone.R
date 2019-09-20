@@ -2,6 +2,7 @@ library(dplyr)
 hud_detects <- readRDS('data and imports/hud_detects.rds')
 
 hud_detects <- hud_detects %>%
+  left_join(readRDS('data and imports/recat_spawning_region.rds')) %>%
   filter(date.floor < as.Date('2019-01-01')) %>%
   mutate(year = lubridate::year(date.local),
          doy = lubridate::yday(date.local),
