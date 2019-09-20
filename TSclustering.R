@@ -205,4 +205,9 @@ recat <- data.frame(transmitter = names(c2_17@datalist),
                     recat_region = ifelse(c2_17@cluster == 1,
                                           'Saugerties-Coxsackie',
                                           'West Point-Newburgh'))
+# Two fish skip-spawned and are recategorized by 2018 behavior
+recat <- rbind(recat,
+  data.frame(transmitter = c('A69-1303-11428', 'A69-1303-11504'),
+             recat_region = c('West Point-Newburgh',
+                              'Saugerties-Coxsackie')))
 saveRDS(recat, 'data and imports/recat_spawning_region.RDS')
