@@ -60,8 +60,8 @@ agg.pos.spl <- lapply(agg.pos.spl, function(y){
         full_join(hold) %>%
         arrange(doy)
     ))
-    hold$avg.imp  <-  na.ma(hold$lat.avg, k = 2)
-    hold$max.imp = na.ma(hold$lat.max, k = 2)
+    hold$avg.imp  <-  na_ma(hold$lat.avg, k = 2)
+    hold$max.imp = na_ma(hold$lat.max, k = 2)
     hold
   })
 })
@@ -127,8 +127,8 @@ agg.pad.spl <- lapply(agg.pad.spl, function(y){
              seq(max(x$doy) + 2, max(hud.doy.seq), by = 1)),
          ]$max.pad <- 40.85
 
-    hold$avg.imp <- na.ma(hold$avg.pad, k = 2)
-    hold$max.imp <- na.ma(hold$max.pad, k = 2)
+    hold$avg.imp <- na_ma(hold$avg.pad, k = 2)
+    hold$max.imp <- na_ma(hold$max.pad, k = 2)
     hold
   })
 })
