@@ -50,7 +50,7 @@ c2 <- readRDS('data and imports/cluster data/c2.rda')
 c2_17 <- winner(c2, 2017)
 c2_18 <- winner(c2, 2018)
 
-clusterplot(c2_18)
+clusterplot(c2_17)
 
 # c3 <- selections(3) #saved as .rda
 c3 <- readRDS('data and imports/cluster data/c3.rda')
@@ -195,3 +195,14 @@ base_plot +
   theme(axis.text = element_text(size = 18),
         axis.title = element_text(size = 18),
         strip.text = element_text(size = 18))
+
+
+# Export recategorized fish ----
+c2 <- readRDS('data and imports/cluster data/c2.rda')
+c2_17 <- winner(c2, 2017)
+
+recat <- data.frame(transmitter = names(c2_17@datalist),
+                    recat_region = ifelse(c2_17@cluster == 1,
+                                          'Saugerties-Coxsackie',
+                                          'West Point-Newburgh'))
+saveRDS(recat, 'data and imports/recat_spawning_region.RDS')
