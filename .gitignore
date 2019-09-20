@@ -33,6 +33,7 @@ vignettes/*.pdf
 *.knit.md
 .Rproj.user
 
-# Misc files
+# Data files
 *.RDS
 *.rda
+*.csv
