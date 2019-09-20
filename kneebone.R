@@ -19,7 +19,9 @@ region <- ggplot() + geom_point(data = reduced_pts,
                       position = position_dodge(width = 0.3)) +
   # position_dodge() only works horizontally; have to plot x on y and coord_flip
   coord_flip() +
-  scale_color_grey(start = 0.8, end = 0.2)+
+  # then scale the y axis since it's flipped
+  scale_y_continuous(expand = c(0.005, 0)) +
+  scale_color_grey(start = 0.8, end = 0.2) +
   facet_wrap(~ year) +
   labs(x = NULL, y = 'Day of Year', color = "Tagging Region") +
   theme_bw() +
@@ -34,7 +36,8 @@ region <- ggplot() + geom_point(data = reduced_pts,
         axis.title.x=element_blank(),
         axis.text.x=element_blank(),
         axis.ticks.x=element_blank(),
-        plot.margin = unit(c(0, 0.1, 0.1, 0.1), "cm"))
+        plot.margin = unit(c(0.2, 0.2, 0.1, 0.05), "cm"),
+        panel.spacing.x = unit(0.01, "lines"))
 
 
 sex <- ggplot() + geom_point(data = reduced_pts,
@@ -42,9 +45,11 @@ sex <- ggplot() + geom_point(data = reduced_pts,
                       position = position_dodge(width = 0.3)) +
   # position_dodge() only works horizontally; have to plot x on y and coord_flip
   coord_flip() +
-  scale_color_grey(start = 0.8, end = 0.2)+
+  scale_y_continuous(expand = c(0.005, 0)) +
+  scale_color_grey(start = 0.8, end = 0.2) +
   facet_wrap(~ year) +
   labs(x = NULL, y = 'Day of Year', color = "Sex") +
+  # scale_x_continuous(expand = c(0, 0)) +
   theme_bw() +
   theme(legend.position = c(0.02, 0.4),
         legend.justification = c(0, 1),
@@ -57,7 +62,8 @@ sex <- ggplot() + geom_point(data = reduced_pts,
         axis.title.x=element_blank(),
         axis.text.x=element_blank(),
         axis.ticks.x=element_blank(),
-        plot.margin = unit(c(0, 0.1, 0.1, 0.1), "cm"))
+        plot.margin = unit(c(0, 0.2, 0.1, 0.05), "cm"),
+        panel.spacing.x = unit(0.01, "lines"))
 
 
 
@@ -73,8 +79,9 @@ length <- ggplot() + geom_point(data = reduced_pts_len,
                       position = position_dodge(width = 0.5)) +
   # position_dodge() only works horizontally; have to plot x on y and coord_flip
   coord_flip() +
+    scale_y_continuous(expand = c(0.005, 0)) +
   scale_color_grey(start = 0.8, end = 0.2,
-                   guide = guide_legend(reverse = T))+
+                   guide = guide_legend(reverse = T)) +
   facet_wrap(~ year) +
   labs(x = NULL, y = 'Day of Year', color = "Total Length (cm)") +
   theme_bw() +
@@ -88,7 +95,8 @@ length <- ggplot() + geom_point(data = reduced_pts_len,
         axis.text.y = element_text(size = 10),
         axis.text.x = element_text(size = 12),
         axis.title.x = element_text(size = 12),
-        plot.margin = unit(c(0, 0.1, 0.1, 0.1), "cm"))
+        plot.margin = unit(c(0, 0.2, 0.1, 0.05), "cm"),
+        panel.spacing.x = unit(0.01, "lines"))
 
 library(cowplot)
 
