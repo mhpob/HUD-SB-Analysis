@@ -1,7 +1,7 @@
 # Data import ----
 library(lubridate); library(dplyr)
 
-all <- readRDS('hud_detects.RDS')
+all <- readRDS('data and imports/hud_detects.RDS')
 hud <- all %>%
   filter(date.local >= '2017-03-15',
          array %in% c('Above', 'Saugerties-Coxsackie', 'Between',
@@ -283,7 +283,7 @@ trends.rot <- solve(H.inv) %*% dfa$states
 trends.df <- data.frame(value = c(trends.rot[1,], trends.rot[2,]),
                         date = rep(seq(ymd('2017-04-04'), ymd('2017-06-24'),
                                        by = 'day'), times = 2),
-                        trend = rep(c('T1', 'T2'), each = 82)
+                        trend = rep(c('T1', 'T2'), each = 82))
 trends.df$lat <- trends.df$value * sd(modeled.pos$lat.avg, na.rm = T) + 40.85
 ggplot(trends.df) + geom_line(aes(x = date, y = lat, color = trend)) +
   geom_hline(yintercept = 41.45) + geom_hline(yintercept = 42.22)

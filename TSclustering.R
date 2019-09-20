@@ -1,6 +1,6 @@
 library(dtwclust)
 
-source('perfishTS.R')
+source('data and imports/perfishTS.R')
 
 # agg.pad.imp <- agg.pad.imp %>%
 #   group_by(transmitter) %>%
@@ -46,24 +46,24 @@ clusterplot <- function(win_data){
 }
 
 # c2 <- selections(2) #saved as .rda
-c2 <- readRDS('cluster data/c2.rda')
+c2 <- readRDS('data and imports/cluster data/c2.rda')
 c2_17 <- winner(c2, 2017)
 c2_18 <- winner(c2, 2018)
 
 clusterplot(c2_18)
 
 # c3 <- selections(3) #saved as .rda
-c3 <- readRDS('cluster data/c3.rda')
+c3 <- readRDS('data and imports/cluster data/c3.rda')
 c3_17 <- winner(c3, 2017)
 c3_18 <- winner(c3, 2018)
 
 # c4 <- selections(4) #saved as .rda
-c4 <- readRDS('cluster data/c4.rda')
+c4 <- readRDS('data and imports/cluster data/c4.rda')
 c4_17 <- winner(c4, 2017)
 c4_18 <- winner(c4, 2018)
 
 # c5 <- selections(5)  #saved as .rda
-c5 <- readRDS('cluster data/c5.rda')
+c5 <- readRDS('data and imports/cluster data/c5.rda')
 c5_17 <- winner(c5, 2017)
 c5_18 <- winner(c5, 2018)
 

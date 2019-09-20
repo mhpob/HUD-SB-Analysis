@@ -1,6 +1,6 @@
 library(dplyr)
 
-hudson <- readRDS('p:/obrien/biotelemetry/hudson sb/hud-sb-analysis/hud_detects.rds')
+hudson <- readRDS('data and imports/hud_detects.rds')
 names(hudson) <- tolower(names(hudson))
 
 # Select fish that made it to Mar 15, 2017

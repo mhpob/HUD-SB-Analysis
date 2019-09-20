@@ -1,7 +1,7 @@
 
 # One migration track highlight ----
 # Use agg.pos.imp from perfishTS.R
-source('perfishTS.R')
+source('data and imports/perfishTS.R')
 # library(ggplot2); library(dplyr)
 k <- filter(agg.pos.imp, grepl('11490', transmitter)) %>%
   mutate(avg.imp = ifelse(!is.na(lat.avg), NA, avg.imp))
@@ -143,7 +143,7 @@ ggplot(cents17) +
 # Sex highlighting ----
 # Use agg.pad.imp from perfishTS.R
 # library(ggplot2); library(dplyr)
-c2 <- readRDS('cluster data/c2.rda')
+c2 <- readRDS('data and imports/cluster data/c2.rda')
 c2_17 <- c2[[1]][[1]][[1]]
 c2_18 <- c2[[2]][[1]][[1]]
 

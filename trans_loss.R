@@ -1,5 +1,5 @@
 library(TelemetryR); library(ggplot2); library(lubridate); library(dplyr)
-detects <- readRDS('hud_detects.RDS')
+detects <- readRDS('data and imports/hud_detects.RDS')
 # Overall loss
 loss_overall <- trans_loss(detects, 'date.local', 'transmitter')
 ggplot() +
@@ -22,7 +22,7 @@ loss_tag <- detects %>%
 
 # Loss coded by cluster-based classification
 # Load saved c2 from TSclustering.R.
-c2 <- readRDS('cluster data/c2.rda')
+c2 <- readRDS('data and imports/cluster data/c2.rda')
 temp <- data.frame(transmitter = names(c2[[1]]$results[[1]]@datalist),
                    cluster = c2[[1]]$results[[1]]@cluster)%>%
   left_join(distinct(detects, transmitter, region)) %>%

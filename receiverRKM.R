@@ -35,4 +35,4 @@ distances <- round(distances, digits = 2)
 test <- cbind.data.frame(row.names(distances), distances)
 names(test) <- c('station', 'rkm')
 
-write.csv(test, 'receiverRKM.csv', row.names = F)
+write.csv(test, 'data and imports/receiverRKM.csv', row.names = F)

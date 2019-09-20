@@ -1,6 +1,6 @@
 library(TelemetryR)
 
-detects <- readRDS('hud_detects.RDS')
+detects <- readRDS('data and imports/hud_detects.RDS')
 
 
 spl.dets <- split(detects, detects$transmitter)
