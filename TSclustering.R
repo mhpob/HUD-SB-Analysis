@@ -50,7 +50,7 @@ c2 <- readRDS('cluster data/c2.rda')
 c2_17 <- winner(c2, 2017)
 c2_18 <- winner(c2, 2018)
 
-clusterplot(c2_17)
+clusterplot(c2_18)
 
 # c3 <- selections(3) #saved as .rda
 c3 <- readRDS('cluster data/c3.rda')
@@ -69,12 +69,40 @@ c5_18 <- winner(c5, 2018)
 
 
 # 2017 CVIs: 2 votes for 2 and 4 clusters, 1 for 5 and 3
-sapply(list(K2 = c2_17, K3 = c3_17, K4 = c4_17, K5 = c5_17), cvi,
-       type = 'internal')
-# 2018 CVIs: 4 for 5, 1 for 3 and 4
-sapply(list(K2 = c2_18, K3 = c3_18, K4 = c4_18, K5 = c5_18), cvi,
-       type = 'internal')
+cvi_c2_17 <- as.data.frame(
+  sapply(list(K2 = c2_17, K3 = c3_17, K4 = c4_17, K5 = c5_17), cvi,
+         type = 'internal'),
+)
+cvi_c2_17$cvi_choice <- NA
 
+for(i in seq_len(nrow(cvi_c2_17))){
+  cvi_c2_17$cvi_choice[i] <- switch(rownames(cvi_c2_17)[i],
+                         Sil = colnames(cvi_c2_17)[which.max(cvi_c2_17[i,])],
+                         SF = colnames(cvi_c2_17)[which.max(cvi_c2_17[i,])],
+                         CH = colnames(cvi_c2_17)[which.max(cvi_c2_17[i,])],
+                         D = colnames(cvi_c2_17)[which.max(cvi_c2_17[i,])],
+                         DB = colnames(cvi_c2_17)[which.min(cvi_c2_17[i,])],
+                         DBstar = colnames(cvi_c2_17)[which.min(cvi_c2_17[i,])],
+                         COP = colnames(cvi_c2_17)[which.min(cvi_c2_17[i,])])
+}
+
+# 2018 CVIs: 4 for 5, 1 for 3 and 4
+cvi_c2_18 <- as.data.frame(
+  sapply(list(K2 = c2_18, K3 = c3_18, K4 = c4_18, K5 = c5_18), cvi,
+         type = 'internal')
+)
+cvi_c2_18$cvi_choice <- NA
+
+for(i in seq_len(nrow(cvi_c2_18))){
+  cvi_c2_18$cvi_choice[i] <- switch(rownames(cvi_c2_18)[i],
+                            Sil = colnames(cvi_c2_18)[which.max(cvi_c2_18[i,])],
+                            SF = colnames(cvi_c2_18)[which.max(cvi_c2_18[i,])],
+                            CH = colnames(cvi_c2_18)[which.max(cvi_c2_18[i,])],
+                            D = colnames(cvi_c2_18)[which.max(cvi_c2_18[i,])],
+                            DB = colnames(cvi_c2_18)[which.min(cvi_c2_18[i,])],
+                            DBstar = colnames(cvi_c2_18)[which.min(cvi_c2_18[i,])],
+                            COP = colnames(cvi_c2_18)[which.min(cvi_c2_18[i,])])
+}
 
 # Clean plotting ----
 cleanplot <- function(dat, highlight = NULL, highlight_only = F){
@@ -82,7 +110,7 @@ cleanplot <- function(dat, highlight = NULL, highlight_only = F){
   nseries <- ifelse(substr(dat, 4, 6) == '17', 66, 40)
 
   cents <- data.frame(cent = rep(paste('Centroid', 1:ncentroids, sep = ' '),
-                                 each = 86),
+                                 each = 87),
                       value = do.call(c, get(dat)@centroids),
                       date = rep(unique(agg.pad.imp$doy), times = ncentroids)) %>%
     mutate(date = as.Date('2017-01-01') + (date - 1))
