@@ -3,7 +3,7 @@ hud_detects <- readRDS('data and imports/hud_detects.rds')
 
 hud_detects <- hud_detects %>%
   left_join(readRDS('data and imports/recat_spawning_region.rds')) %>%
-  filter(date.floor < as.Date('2019-01-01')) %>%
+  filter(date.floor < lubridate::ymd('2019-01-01', tz = 'America/New_York')) %>%
   mutate(year = lubridate::year(date.local),
          doy = lubridate::yday(date.local),
          array = ifelse(grepl('Ab|Be|Saug|Newb', array), 'Hudson', array),
@@ -12,11 +12,11 @@ hud_detects <- hud_detects %>%
                                    'DE', 'NJ Coast', 'NY Coast', 'Hudson',
                                    'LI Sound', 'MA', 'ME'), ordered = T))
 
-reduced_pts <- distinct(hud_detects, transmitter, doy, array, .keep_all = T)
+reduced_pts_recat <- distinct(hud_detects, transmitter, doy, array, .keep_all = T)
 
 library(ggplot2)
-region <- ggplot() + geom_point(data = reduced_pts,
-                      aes(x = array, y = doy, color = region),
+region <- ggplot() + geom_point(data = reduced_pts_recat,
+                      aes(x = array, y = doy, color = recat_region),
                       position = position_dodge(width = 0.3)) +
   # position_dodge() only works horizontally; have to plot x on y and coord_flip
   coord_flip() +
@@ -40,8 +40,8 @@ region <- ggplot() + geom_point(data = reduced_pts,
         plot.margin = unit(c(0.2, 0.2, 0.1, 0.05), "cm"),
         panel.spacing.x = unit(0.01, "lines"))
 
-
-sex <- ggplot() + geom_point(data = reduced_pts,
+reduced_pts_sex <- distinct(hud_detects, transmitter, doy, array, .keep_all = T)
+sex <- ggplot() + geom_point(data = reduced_pts_sex,
                       aes(x = array, y = doy, color = sex),
                       position = position_dodge(width = 0.3)) +
   # position_dodge() only works horizontally; have to plot x on y and coord_flip
