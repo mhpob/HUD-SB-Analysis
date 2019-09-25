@@ -12,21 +12,28 @@ hud_detects <- hud_detects %>%
                                    'DE', 'NJ Coast', 'NY Coast', 'Hudson',
                                    'LI Sound', 'MA', 'ME'), ordered = T))
 
-reduced_pts_recat <- distinct(hud_detects, transmitter, doy, array, .keep_all = T)
+reduced_pts <- distinct(hud_detects, transmitter, doy, array, .keep_all = T) %>%
+  mutate(recat_region = factor(recat_region,
+                               levels = c('Other',
+                                          'West Point-Newburgh',
+                                          'Saugerties-Coxsackie'),
+                               ordered = T))
 
 library(ggplot2)
-region <- ggplot() + geom_point(data = reduced_pts_recat,
+region <- ggplot() + geom_point(data = filter(reduced_pts,
+                                              !is.na(recat_region)),
                       aes(x = array, y = doy, color = recat_region),
                       position = position_dodge(width = 0.3)) +
   # position_dodge() only works horizontally; have to plot x on y and coord_flip
   coord_flip() +
   # then scale the y axis since it's flipped
   scale_y_continuous(expand = c(0.005, 0)) +
-  scale_color_grey(start = 0.8, end = 0.2) +
+  scale_color_grey(start = 0.8, end = 0.2,
+                   guide = guide_legend(reverse = T)) +
   facet_wrap(~ year) +
-  labs(x = NULL, y = 'Day of Year', color = "Tagging Region") +
+  labs(x = NULL, y = 'Day of Year', color = "Spawning Region") +
   theme_bw() +
-  theme(legend.position = c(0.02, 0.4),
+  theme(legend.position = c(0.02, 0.5),
         legend.justification = c(0, 1),
         legend.text = element_text(size = 12),
         legend.title = element_text(size = 12),
@@ -40,8 +47,8 @@ region <- ggplot() + geom_point(data = reduced_pts_recat,
         plot.margin = unit(c(0.2, 0.2, 0.1, 0.05), "cm"),
         panel.spacing.x = unit(0.01, "lines"))
 
-reduced_pts_sex <- distinct(hud_detects, transmitter, doy, array, .keep_all = T)
-sex <- ggplot() + geom_point(data = reduced_pts_sex,
+
+sex <- ggplot() + geom_point(data = reduced_pts,
                       aes(x = array, y = doy, color = sex),
                       position = position_dodge(width = 0.3)) +
   # position_dodge() only works horizontally; have to plot x on y and coord_flip
