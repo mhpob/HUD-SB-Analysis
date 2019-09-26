@@ -1,7 +1,7 @@
 # Data import ----
 library(ggplot2); library(imputeTS); library(lubridate); library(dplyr)
 
-all <- readRDS('hud_detects.RDS')
+all <- readRDS('data and imports/hud_detects.RDS')
 # 2017 spawning season (encompassed by Mar through June)
 hud17 <- all %>%
   filter(date.local >= '2017-03-15',
