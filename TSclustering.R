@@ -110,15 +110,15 @@ cleanplot <- function(dat, highlight = NULL, highlight_only = F){
   nseries <- ifelse(substr(dat, 4, 6) == '17', 66, 40)
 
   cents <- data.frame(cent = rep(paste('Centroid', 1:ncentroids, sep = ' '),
-                                 each = 87),
+                                 each = 88),
                       value = do.call(c, get(dat)@centroids),
                       date = rep(unique(agg.pad.imp$doy), times = ncentroids)) %>%
     mutate(date = as.Date('2017-01-01') + (date - 1))
   TS <- data.frame(TS = do.call(c, get(dat)@datalist),
-                   trans = rep(names(get(dat)@datalist), each = 86),
+                   trans = rep(names(get(dat)@datalist), each = 88),
                    date = rep(unique(agg.pad.imp$doy), times = nseries),
                    cent = paste0('Centroid ',
-                                 rep(get(dat)@cluster, each = 86))) %>%
+                                 rep(get(dat)@cluster, each = 88))) %>%
     mutate(date = as.Date('2017-01-01') + (date - 1)) %>%
     left_join(filter(distinct(ungroup(agg.pad.imp), transmitter, sex),
                      !is.na(sex)),
