@@ -186,13 +186,29 @@ cleanplot <- function(dat, highlight = NULL, highlight_only = F){
   }
 }
 
+# Second-most-frquent
+# c2_18 <- c2[['r_series18']][['results']][[4]]
+
 base_plot <- cleanplot('c2_18')
 
-base_plot +
-  theme(axis.text = element_text(size = 18),
-        axis.title = element_text(size = 18),
-        strip.text = element_text(size = 18))
+p2017 <- cleanplot('c2_17') +
+  labs(x = NULL, y = NULL) +
+  theme(axis.text = element_text(size = 16),
+        axis.title = element_text(size = 16),
+        strip.text = element_text(size = 16),
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        plot.margin = unit(c(0.2, 0.2, 0.1, 0.05), "cm"))
 
+p2018 <- cleanplot('c2_18') +
+  labs(y = NULL) +
+  theme(axis.text = element_text(size = 16),
+        axis.title = element_text(size = 16),
+        strip.text = element_text(size = 16),
+        plot.margin = unit(c(0, 0.2, 0.1, 0.05), "cm"))
+
+library(cowplot)
+plot_grid(p2017, p2018, ncol = 1)
 
 # Export recategorized fish ----
 c2 <- readRDS('data and imports/cluster data/c2.rda')
