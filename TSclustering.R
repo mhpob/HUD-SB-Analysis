@@ -186,10 +186,7 @@ cleanplot <- function(dat, highlight = NULL, highlight_only = F){
   }
 }
 
-k2_18 <- c2[[2]][[1]][[1]] #cheating a bit with this
-temp <- data.frame(transmitter = names(k2_18@datalist), cluster = k2_18@cluster)
-p <- filter(temp, cluster == 2)
-base_plot <- cleanplot('c2_17', highlight = p$transmitter)
+base_plot <- cleanplot('c2_18')
 
 base_plot +
   theme(axis.text = element_text(size = 18),
