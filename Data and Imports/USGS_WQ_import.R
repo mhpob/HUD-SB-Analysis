@@ -12,9 +12,7 @@ wq <- do.call(rbind, wq_list)
 
 # remove checksum header and data-quality descriptor columns
 wq <- wq[wq$agency_cd == 'USGS', !grepl('_cd', names(wq))]
-# rename according to metadata
 
-wq <- wq[wq$agency_cd == 'USGS', !grepl('_cd', names(wq))]
 names(wq)[3:ncol(wq)] <- c(
   'mse_hl', 'mse_l', 'mse_h', 'mse_lh', 'mse',
   'mwt', 'max_wt',
