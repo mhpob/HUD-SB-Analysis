@@ -1,10 +1,5 @@
 library(lubridate); library(dplyr)
 
-## Import detections ----
-dets <- readRDS('data and imports/hud_detects.RDS') %>%
-  filter(grepl('Above|Saug|Between|Newb|Below', array))
-
-
 ## Import temperature data ----
 # USGS stations
 usgs_data <- readRDS("data and imports/usgs_wq.rds") %>%
@@ -32,11 +27,14 @@ rec_data <- rec_data %>%
          year = year(date.local)) %>%
   filter(month(date.local) %in% 3:7,
          year == 2017) %>%
-  group_by(date.floor) %>%
+  group_by(date.floor, year) %>%
   summarize(avg.temp = mean(Data))
 
 # Visual inspection
-ggplot() + geom_point(data = rec_data2, aes(x = date.floor, y = avg.temp))
+ggplot() + geom_point(data = usgs_data, aes(x = date.local, y = mwt,
+                                            color = site_name)) +
+  geom_point(data = rec_data, aes(x = date.floor, y = avg.temp)) +
+  facet_wrap(~year, scales = 'free_x')
 
 
 ##
@@ -46,40 +44,38 @@ ggplot() + geom_point(data = rec_data2, aes(x = date.floor, y = avg.temp))
 ##
 
 ## Create ECDF plot of detection returns, per array ----
-species_all <- species %>%
-  group_by(array, Common.Name, transmitter) %>%
-  distinct(array, transmitter, .keep_all = T) %>%
-  summarize(min = min(date.utc))
+## Import detections ----
+dets <- readRDS('data and imports/hud_detects.RDS') %>%
+  filter(grepl('Above|Saug|Between|Newb|Below', array),
+         date.local >= '2017-01-01',
+         month(date.local) %in% 3:7) %>%
+  mutate(year = year(date.local))
 
-det_ecdfplot <- function(spec.plot, array, ylab = NULL, ...){
+allhud <- dets %>%
+  group_by(transmitter, year) %>%
+  summarize(min = min(date.local))
 
-  data <- filter(species_all, grepl(spec.plot, Common.Name, ignore.case = T))
-  data <- split(data, data$array)
+det_ecdfplot <- function(data, year, ylab = NULL, ...){
+  data <- split(data, data$year)
   data <- lapply(data, function(x){ecdf(x$min)})
 
-  plot(x = as_datetime(knots(data[[array]])),
-       y = data[[array]](knots(data[[array]])),
+  plot(x = as_datetime(knots(data[[year]])),
+       y = data[[year]](knots(data[[year]])),
        ylim = c(0, 1),
-       xlim = c(ymd_hms('20161111 19:00:00'),
-                ymd_hms('20170328 21:00:00')),
+       xlim = c(ymd_hms(paste0(year, '0401 00:00:00')),
+                ymd_hms(paste0(year, '0615 00:00:00'))),
        xlab = 'Date',
        ylab = ifelse(is.null(ylab),
                      eval(expression(paste(
-                       'Fraction detected in', array, 'array'))),
+                       'Fraction detected in', year))),
                      ylab),
-       pch = 16, ...)
-
-  # This is just to stop lines() from throwing warnings when we specify
-  # graphical parameters it doesn't like.
-  LLines <- function(..., log, axes, frame.plot, panel.first, panel.last) {
-    lines(...)
-  }
-  LLines(x = as_datetime(knots(data[[array]])),
-         y = data[[array]](knots(data[[array]])),
-         type = 's', ...)
+       pch = 16)
+  lines(x = as_datetime(knots(data[[year]])),
+        y = data[[year]](knots(data[[year]])),
+        type = 's')
 }
 
-det_ecdfplot(spec.plot = 'sturg', array = 'MD WEA')
+det_ecdfplot(data = allhud, year = '2017')
 
 ## Create temperature v ECDF plot ----
 temp_ecdfplot <- function(array, spec.data){
