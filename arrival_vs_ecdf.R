@@ -47,12 +47,6 @@ ggplot() +
   labs(x = NULL, y = 'Discharge (cm^3 s^-1)') +
   theme_bw()
 
-##
-##
-## EVERYTHIUNG BELOW THIS IS SAMPLE CODE. WILL NOT RUN WITH THESE DATA----
-##
-##
-
 ## Create ECDF plot of detection returns, per array ----
 ## Import detections ----
 dets <- readRDS('data and imports/hud_detects.RDS') %>%
