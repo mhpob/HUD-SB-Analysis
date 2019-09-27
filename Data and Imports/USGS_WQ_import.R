@@ -48,4 +48,4 @@ wq$site_name <- 'HR_albany'
 
 wq_master <- merge(wq_master, wq, all = T)
 
-saveRDS(wq_master, 'usgs_wq.rds')
+saveRDS(wq_master, 'data and imports/usgs_wq.rds')
