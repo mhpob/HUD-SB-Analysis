@@ -1,0 +1,81 @@
+BELOW POUGHKEEPSIE
+
+# ---------------------------------- WARNING ----------------------------------------
+# Some of the data that you have obtained from this U.S. Geological Survey database
+# may not have received Director's approval. Any such data values are qualified
+# as provisional and are subject to revision. Provisional data are released on the
+# condition that neither the USGS nor the United States Government may be held liable
+# for any damages resulting from its use.
+#
+# Additional info: https://help.waterdata.usgs.gov/policies/provisional-data-statement
+#
+# File-format description:  https://help.waterdata.usgs.gov/faq/about-tab-delimited-output
+# Automated-retrieval info: https://help.waterdata.usgs.gov/faq/automated-retrievals
+#
+# Contact:   gs-w_support_nwisweb@usgs.gov
+# retrieved: 2019-09-27 09:57:59 EDT       (vaww01)
+#
+# Data for the following 1 site(s) are contained in this file
+#    USGS 01372058 HUDSON RIVER BELOW POUGHKEEPSIE NY
+# -----------------------------------------------------------------------------------
+#
+# Data provided for site 01372058
+#            TS   parameter     statistic     Description
+#        172633       62619     00023     Estuary or ocean water surface elevation above NGVD 1929, feet (Tidal High-Low (Daily))
+#        172634       62619     00024     Estuary or ocean water surface elevation above NGVD 1929, feet (Tidal Low (Daily))
+#        172635       62619     00021     Estuary or ocean water surface elevation above NGVD 1929, feet (Tidal High (Daily))
+#        172636       62619     00022     Estuary or ocean water surface elevation above NGVD 1929, feet (Tidal Low-High (Daily))
+#        172637       62619     00003     Estuary or ocean water surface elevation above NGVD 1929, feet (Mean)
+#        172681       00010     00003     Temperature, water, degrees Celsius (Mean)
+#        172682       00010     00001     Temperature, water, degrees Celsius (Maximum)
+#        172683       00095     00002     Specific conductance, water, unfiltered, microsiemens per centimeter at 25 degrees Celsius (Minimum)
+#        172684       00095     00001     Specific conductance, water, unfiltered, microsiemens per centimeter at 25 degrees Celsius (Maximum)
+#        172685       00095     00003     Specific conductance, water, unfiltered, microsiemens per centimeter at 25 degrees Celsius (Mean)
+#        172686       00010     00002     Temperature, water, degrees Celsius (Minimum)
+#        213048       72137     00003     Discharge, tidally filtered, cubic feet per second (Mean)
+#        214222       63680     00003     Turbidity, water, unfiltered, monochrome near infra-red LED light, 780-900 nm, detection angle 90 +-2.5 degrees, formazin nephelometric units (FNU) (Mean)
+#
+# Data-value qualification codes included in this output:
+#        
+#     A  Approved for publication -- Processing and review completed.
+# 
+
+
+ALBANY
+
+# ---------------------------------- WARNING ----------------------------------------
+# Some of the data that you have obtained from this U.S. Geological Survey database
+# may not have received Director's approval. Any such data values are qualified
+# as provisional and are subject to revision. Provisional data are released on the
+# condition that neither the USGS nor the United States Government may be held liable
+# for any damages resulting from its use.
+#
+# Additional info: https://help.waterdata.usgs.gov/policies/provisional-data-statement
+#
+# File-format description:  https://help.waterdata.usgs.gov/faq/about-tab-delimited-output
+# Automated-retrieval info: https://help.waterdata.usgs.gov/faq/automated-retrievals
+#
+# Contact:   gs-w_support_nwisweb@usgs.gov
+# retrieved: 2019-09-27 10:55:15 EDT       (caww01)
+#
+# Data for the following 1 site(s) are contained in this file
+#    USGS 01359139 HUDSON RIVER AT ALBANY NY
+# -----------------------------------------------------------------------------------
+#
+# Data provided for site 01359139
+#            TS   parameter     statistic     Description
+#        105066       00010     00001     Temperature, water, degrees Celsius (Maximum)
+#        105067       00010     00002     Temperature, water, degrees Celsius (Minimum)
+#        105068       00010     00003     Temperature, water, degrees Celsius (Mean)
+#        105069       62619     00003     Estuary or ocean water surface elevation above NGVD 1929, feet (Mean)
+#        105070       62619     00021     Estuary or ocean water surface elevation above NGVD 1929, feet (Tidal High (Daily))
+#        105071       62619     00022     Estuary or ocean water surface elevation above NGVD 1929, feet (Tidal Low-High (Daily))
+#        105072       62619     00023     Estuary or ocean water surface elevation above NGVD 1929, feet (Tidal High-Low (Daily))
+#        105073       62619     00024     Estuary or ocean water surface elevation above NGVD 1929, feet (Tidal Low (Daily))
+#
+# Data-value qualification codes included in this output:
+#        
+#     A  Approved for publication -- Processing and review completed.
+#     e  Value has been estimated.
+# 
+a
