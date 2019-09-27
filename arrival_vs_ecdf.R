@@ -73,7 +73,7 @@ river_sub <- function(area){
     summarize(min = min(date.local))
 }
 
-det_ecdfplot <- function(data, year, ylab = NULL, ...){
+det_ecdfplot <- function(data, year, ylab = NULL, xlab = 'Date', ...){
   data <- split(data, data$year)
   data <- lapply(data, function(x){ecdf(x$min)})
 
@@ -82,7 +82,7 @@ det_ecdfplot <- function(data, year, ylab = NULL, ...){
        ylim = c(0, 1),
        xlim = c(ymd_hms(paste0(year, '0401 00:00:00')),
                 ymd_hms(paste0(year, '0615 00:00:00'))),
-       xlab = 'Date',
+       xlab = xlab,
        ylab = ifelse(is.null(ylab),
                      eval(expression(paste(
                        'Fraction detected in', year))),
@@ -101,7 +101,7 @@ det_ecdfplot <- function(data, year, ylab = NULL, ...){
 temp_ecdfplot <- function(year, subsets){
   temp_data <- usgs_data[usgs_data$year == year,]
 
-  par(mar = c(4, 4, 1, 4) + 0.1)
+  par(mar = c(3, 3, 1, 3) + 0.1)
   plot(x = temp_data[grepl('pough', temp_data$site_name),]$date.local,
        y = temp_data[grepl('pough', temp_data$site_name),]$mwt,
        lty = 1,
@@ -109,16 +109,17 @@ temp_ecdfplot <- function(year, subsets){
                 ymd_hms(paste0(year, '0615 00:00:00'))),
        ylim = c(0, 25),
        xaxt = 'n',
-       xlab = 'Date',
-       ylab = 'Temperature (C)',
+       xlab = '',
+       ylab = '',
        type = 'l',
        lwd = 2)
+  title(xlab = 'Date', ylab = 'Temperature (C)', line = 2)
   lines(x = temp_data[grepl('alb', temp_data$site_name),]$date.local,
         y = temp_data[grepl('alb', temp_data$site_name),]$mwt,
         lwd = 2, lty = 2)
   axis.POSIXct(1, at = seq(ymd_hms(paste0(year, '0401 00:00:00')),
                            ymd_hms(paste0(year, '0615 00:00:00')),
-                           by = 'month'), format = '%m-%Y')
+                           by = 'week'), format = '%m-%d')
 
   river_sub <- function(area){
     dets %>%
@@ -129,26 +130,26 @@ temp_ecdfplot <- function(year, subsets){
 
   colors4plot <- function(x){
     switch(x,
-           'Below' = hcl(h = 1, l = 65, c = 100),
-           'West Point-Newburgh' = hcl(h = 15, l = 65, c = 100),
-           'Between' = hcl(h = 87, l = 65, c = 100),
-           'Saugerties-Coxsackie' = hcl(h = 195, l = 65, c = 100),
-           'Above' = hcl(h = 231, l = 65, c = 100))
+           'Below' = 'lightgray',
+           'West Point-Newburgh' = hcl(h = 195, l = 65, c = 100),
+           'Between' = 'gray',
+           'Saugerties-Coxsackie' = hcl(h = 15, l = 65, c = 100),
+           'Above' = 'darkgray')
   }
-
 
   for(i in seq_along(subsets)){
     par(new = T)
     det_ecdfplot(data = river_sub(subsets[i]), year = year, ylab = '', axes = F,
-                 col = colors4plot(subsets[i]))
-
+                 xlab = '', col = colors4plot(subsets[i]))
   }
+
   axis(4, las = 0.5, col.axis = 'blue')
   mtext(side = 4, line = 2, text = eval(expression(paste(
-    'Fraction detected in', year))), col = 'blue')
+    'Fraction detected per river section (', year, ')'))), col = 'blue')
 
 }
 
+temp_ecdfplot(year = '2017', subsets = unique(dets$array))
 temp_ecdfplot(year = '2018', subsets = unique(dets$array))
 
 
