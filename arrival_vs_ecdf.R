@@ -91,26 +91,34 @@ det_ecdfplot <- function(data, year, ylab = NULL, xlab = 'Date', ...){
 }
 
 
-## Create temperature v ECDF plot ----
-temp_ecdfplot <- function(year, subsets){
+## Create variable v ECDF plot ----
+var_ecdfplot <- function(year, array_subsets, data_type = 'mwt'){
   temp_data <- usgs_data[usgs_data$year == year,]
+  if(data_type == 'mdisch'){
+    temp_data$mdisch <- temp_data$mdisch / 1000
+  }
 
   par(mar = c(3, 3, 1, 3) + 0.1)
   plot(x = temp_data[grepl('pough', temp_data$site_name),]$date.local,
-       y = temp_data[grepl('pough', temp_data$site_name),]$mwt,
+       y = temp_data[grepl('pough', temp_data$site_name),][[data_type]],
        lty = 1,
        xlim = c(ymd_hms(paste0(year, '0401 00:00:00')),
                 ymd_hms(paste0(year, '0615 00:00:00'))),
-       ylim = c(0, 25),
+       ylim = c(0, ifelse(data_type == 'mwt', 25, 110)),
        xaxt = 'n',
        xlab = '',
        ylab = '',
        type = 'l',
        lwd = 2)
-  title(xlab = 'Date', ylab = 'Temperature (C)', line = 2)
-  lines(x = temp_data[grepl('alb', temp_data$site_name),]$date.local,
-        y = temp_data[grepl('alb', temp_data$site_name),]$mwt,
-        lwd = 2, lty = 2)
+  title(xlab = 'Date', ylab = ifelse(data_type == 'mwt',
+                                     'Temperature (C)',
+                                     'Discharge (1000 m^3/s)'),
+        line = 2)
+  if(data_type == 'mwt'){
+    lines(x = temp_data[grepl('alb', temp_data$site_name),]$date.local,
+          y = temp_data[grepl('alb', temp_data$site_name),]$mwt,
+          lwd = 2, lty = 2)
+  }
   axis.POSIXct(1, at = seq(ymd_hms(paste0(year, '0401 00:00:00')),
                            ymd_hms(paste0(year, '0615 00:00:00')),
                            by = 'week'), format = '%m-%d')
@@ -131,10 +139,11 @@ temp_ecdfplot <- function(year, subsets){
            'Above' = 'darkgray')
   }
 
-  for(i in seq_along(subsets)){
+  for(i in seq_along(array_subsets)){
     par(new = T)
-    det_ecdfplot(data = river_sub(subsets[i]), year = year, ylab = '', axes = F,
-                 xlab = '', col = colors4plot(subsets[i]))
+    det_ecdfplot(data = river_sub(array_subsets[i]), year = year,
+                 ylab = '', xlab = '',  axes = F,
+                 col = colors4plot(array_subsets[i]))
   }
 
   axis(4, las = 0.5, col.axis = 'blue')
@@ -143,8 +152,16 @@ temp_ecdfplot <- function(year, subsets){
 
 }
 
-temp_ecdfplot(year = '2017', subsets = unique(dets$array))
-temp_ecdfplot(year = '2018', subsets = unique(dets$array))
+# Water temperature
+var_ecdfplot(year = '2017', array_subsets = unique(dets$array))
+var_ecdfplot(year = '2018', array_subsets = unique(dets$array))
+
+# Discharge
+var_ecdfplot(year = '2017', array_subsets = unique(dets$array),
+              data_type = 'mdisch')
+var_ecdfplot(year = '2018', array_subsets = unique(dets$array),
+              data_type = 'mdisch')
+
 
 
 ## ECDF v temperature? ----
