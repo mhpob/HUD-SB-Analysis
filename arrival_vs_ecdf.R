@@ -15,7 +15,7 @@ ggplot() + geom_point(data = usgs_data, aes(x = date.local, y = mwt,
 
 # BWT from Storm King AR unit
 rec_data <- read.csv(file.path('p:/obrien/biotelemetry/hudson sb/detections',
-                               'receiver logs/receiver_events_2016-2017.csv'),
+                               'receiver logs/receiver_events_2016-2019.csv'),
                      stringsAsFactors = F)
 
 rec_data <- rec_data %>%
@@ -26,7 +26,7 @@ rec_data <- rec_data %>%
          date.floor = floor_date(date.local, 'day'),
          year = year(date.local)) %>%
   filter(month(date.local) %in% 3:7,
-         year == 2017) %>%
+         year %in% 2016:2018) %>%
   group_by(date.floor, year) %>%
   summarize(avg.temp = mean(Data))
 
