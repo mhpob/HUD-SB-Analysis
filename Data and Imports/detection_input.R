@@ -35,14 +35,14 @@ array_greps <- list(
   'West Point-Newburgh' = '^lighted buoy (27|[4-5]\\d)|king|LL# 3[78][90][1-8].',
   # Should be Bear Mtn Br (~41.32), but using above Verplanck (41.26)
   'Below' = 'croton|^lighted buoy *(7|1\\d|2[0-6])( |$)|nysta',
-  'ME' = '^\\d\\d',
+  'ME' = '^\\d\\d ',
   'MA' = paste0('barns|^b[bh]|buzz|ca\\d|ccc|(chat|hing)ham|ledge|beach|cutty|',
                 'ellis|gurnet|town|hull|m[ao]nom|mar[bst]|comb|merri|musk|',
-                'noman|orl|ph\\d|RI$|rocky|sand|scit|shark|taun|vs|well|^ei|',
-                '^pamet|truro|chs|sippi|mmk|sud'),
+                'noman|orl|ph\\d|RI$|rocky|sandw|scit|shark|taun|vs|well|^ei|',
+                '^pamet|truro|chs|sippi|mmk|sud|joppa'),
   'LI Sound' = 'east r|matti|thames',
   'NY Coast' = 'ltb|[ny] (ea|we)|e\\.c|junc|ique|stony|nywea|mb |moriches',
-  'NJ Coast' = 'opt|garden|egg|barne',
+  'NJ Coast' = 'opt|garden|egg|barne|chapel|raritan|sandy hook',
   'DE Coast' = 'BOEM',
   'DE' = 'C&D|LL# [23]... |de ',
   'MD Coast' = '([at]|cs)-|inner|outer|middle|[iao][nms]\\d',
@@ -90,6 +90,7 @@ rm(sb, array_greps, station_list, grep_check, i)
 # library(dplyr)
 #
 # stations <- hud_detects %>%
+#   filter(lat != 0) %>%
 #   distinct(station, lat, long, .keep_all = T) %>%
 #   st_as_sf(coords = c('long', 'lat'), crs = 4267)
 #
