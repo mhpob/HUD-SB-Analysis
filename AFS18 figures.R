@@ -229,9 +229,10 @@ ggplot() +
   theme_bw()
 
 # Map of whole Hudson ----
-# library(ggplot2); library(sf)
+# library(ggplot2); library(dplyr); library(sf)
 
-midatl <- st_read('c:/users/secor/desktop/gis products/chesapeake/midatlantic')
+midatl <- st_read(file.path('p:/obrien/biotelemetry/past sb/past-analysis',
+                            'manuscript/plos one/atlcoast.gpkg'))
 
 plot_points <- read.csv('p:/obrien/biotelemetry/hudson sb/hudsonpoints.csv')
 
