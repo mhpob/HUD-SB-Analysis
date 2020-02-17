@@ -44,7 +44,7 @@ array_greps <- list(
   'NY Coast' = 'ltb|[ny] (ea|we)|e\\.c|junc|ique|stony|nywea|mb |moriches',
   'NJ Coast' = 'opt|garden|egg|barne|chapel|raritan|sandy hook',
   'DE Coast' = 'BOEM',
-  'DE' = 'C&D|LL# [23]... |de ',
+  'DE' = 'C&D|LL# [23]... |de |NJDB',
   'MD Coast' = '([at]|cs)-|inner|outer|middle|[iao][nms]\\d',
   'VA Coast' = 'scl|^wea|ncc|^cb(\\d| )|2c |^cb$',
   'Ches' = 'cbbt|^york|^b\\d|kent|cedar|ts\\d|tang|poco'
@@ -84,7 +84,7 @@ saveRDS(hud_detects, file = 'hud_detects.RDS')
 rm(sb, array_greps, station_list, grep_check, i)
 
 
-## Visual array assignment check
+# Visual array assignment check
 # library(sf)
 # library(mapview)
 # library(dplyr)
