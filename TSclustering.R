@@ -27,14 +27,15 @@ source('TS_select.R')
 
 selections <- function(n_clust){
   temp <- lapply(list(r_series17, r_series18),
-                 TS_select, reps = 1000, n_clusters = n_clust, dist = 'dtw_basic',
+                 TS_select, reps = 10000, n_clusters = n_clust, dist = 'dtw_basic',
                  cent = 'median', window = '7')
   temp <- setNames(temp, c('r_series17', 'r_series18'))
   temp
 }
-winner <- function(ts_obj, year){
+winner <- function(ts_obj, year, rank){
   yr <- ifelse(year == 2017, 'r_series17', 'r_series18')
-  ts_obj[[yr]][['results']][[which.max(ts_obj[[yr]][['key']]$n)]]
+  index <- which(ts_obj[[yr]][['key']]$n == sort(ts_obj[[yr]][['key']]$n, decreasing = T)[rank])
+  ts_obj[[yr]][['results']][[index]]
 }
 clusterplot <- function(win_data){
   plot(win_data, plot = F) +
@@ -46,11 +47,12 @@ clusterplot <- function(win_data){
 }
 
 # c2 <- selections(2) #saved as .rda
-c2 <- readRDS('data and imports/cluster data/c2.rda')
-c2_17 <- winner(c2, 2017)
-c2_18 <- winner(c2, 2018)
+# saveRDS(c2, 'p:/obrien/biotelemetry/hudson sb/manuscript/c2_manuscript.rda')
+c2 <- readRDS('p:/obrien/biotelemetry/hudson sb/manuscript/c2_manuscript.rda')
+c2_17 <- winner(c2, 2017, 2)
+c2_18 <- winner(c2, 2018, 4)
 
-clusterplot(c2_17)
+clusterplot(c2_18)
 
 # c3 <- selections(3) #saved as .rda
 c3 <- readRDS('data and imports/cluster data/c3.rda')
