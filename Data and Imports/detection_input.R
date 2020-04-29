@@ -30,7 +30,7 @@ array_greps <- list(
   # Lower Coxsackie Island (~42.36 N)
   'Saugerties-Coxsackie' = '(d buoy |[rg])(9\\d|1\\d\\d)|lb 1[015]\\d',
   # Saugerties Lighthouse (~42.07 N)
-  'Between' = 'boll|rogers|rgn|[ r][78]\\d$|lb ([abe7]|6\\d)', #74
+  'Between' = 'boll|rogers|rgn|^(li|u).*[78]\\d$|lb ([abe7]|6\\d)', #74
   # Should be I-84 (41.52N), but using Whites Marina (~41.58 N)
   'West Point-Newburgh' = '^lighted buoy (27|[4-5]\\d)|king|LL# 3[78][90][1-8].',
   # Should be Bear Mtn Br (~41.32), but using above Verplanck (41.26)
@@ -39,7 +39,7 @@ array_greps <- list(
   'MA' = paste0('barns|^b[bh]|buzz|ca\\d|ccc|(chat|hing)ham|ledge|beach|cutty|',
                 'ellis|gurnet|town|hull|m[ao]nom|mar[bst]|comb|merri|musk|',
                 'noman|orl|ph\\d|RI$|rocky|sandw|scit|shark|taun|vs|well|^ei|',
-                '^pamet|truro|chs|sippi|mmk|sud|joppa'),
+                '^pamet|truro|chs|sippi|mmk|sud|joppa|dart'),
   'LI Sound' = 'east r|matti|thames',
   'NY Coast' = 'ltb|[ny] (ea|we)|e\\.c|junc|ique|stony|nywea|mb |moriches',
   'NJ Coast' = 'opt|garden|egg|barne|chapel|raritan|sandy hook',
@@ -47,7 +47,7 @@ array_greps <- list(
   'DE' = 'C&D|LL# [23]... |de |NJDB',
   'MD Coast' = '([at]|cs)-|inner|outer|middle|[iao][nms]\\d',
   'VA Coast' = 'scl|^wea|ncc|^cb(\\d| )|2c |^cb$',
-  'Ches' = 'cbbt|^york|^b\\d|kent|cedar|ts\\d|tang|poco'
+  'Ches' = 'cbbt|^york|^b\\d|kent|cedar|ts\\d|tang|poco|rapp|pian|poq|mob|comfort'
 )
 
 station_list <- lapply(array_greps,
