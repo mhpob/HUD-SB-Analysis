@@ -31,9 +31,16 @@ pred18 <- predict(clust17, r_series18)
 
 all_clust <- inner_join(tibble(transmitter = names(clust17@datalist),
                                cluster17 = as.numeric(clust17@cluster)),
-                        tibble(transmitter = names(pred18), pred18 = pred18))
+                        tibble(transmitter = names(pred18), pred18 = pred18)) %>%
+  left_join(agg.pos.imp %>%
+              ungroup() %>%
+              filter(!is.na(region)) %>%
+              distinct(transmitter, region))
 
 xtabs(~ cluster17 + pred18, data = all_clust)
+chisq.test(xtabs(~ cluster17 + pred18, data = all_clust))
+chisq.test(xtabs(~ region + cluster17, data = all_clust))
+chisq.test(xtabs(~ region + pred18, data = all_clust))
 
 
 cleanplot <- function(dat, highlight = NULL, highlight_only = F){
