@@ -37,3 +37,7 @@ vignettes/*.pdf
 *.RDS
 *.rda
 *.csv
+*.db
+
+# Images
+*.tif
