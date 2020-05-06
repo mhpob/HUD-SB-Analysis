@@ -87,7 +87,7 @@ cleanplot <- function(dat, highlight = NULL, highlight_only = F){
                  xmax = maxdate,
                  ymin = 41.32, ymax = 41.52, fill = 'lightblue') +
         geom_line(data = TS_highlight, aes(x = date, y = TS, group = trans),
-                  color = 'red') +
+                  color = 'red', lwd = 1.5) +
         geom_line(aes(x = date, y = value), lwd = 1.5) +
         scale_x_date(limits = c(as.Date('2017-04-01'), as.Date('2017-07-01'))) +
         labs(x = NULL, y = 'Latitude') +
@@ -103,10 +103,10 @@ cleanplot <- function(dat, highlight = NULL, highlight_only = F){
                  xmin = mindate,
                  xmax = maxdate,
                  ymin = 41.32, ymax = 41.52, fill = 'lightblue') +
-        geom_line(data = TS, aes(x = date, y = TS, group = trans), color = 'gray') +
-        geom_line(aes(x = date, y = value), lwd = 1.5) +
+        geom_line(data = TS, aes(x = date, y = TS, group = trans), color = 'gray35') +
+        geom_line(aes(x = date, y = value), size = 2.5) +
         geom_line(data = TS_highlight, aes(x = date, y = TS, group = trans),
-                  color = 'red') +
+                  color = 'red', size = 1.5) +
         scale_x_date(limits = c(as.Date('2017-04-01'), as.Date('2017-07-01'))) +
         labs(x = NULL, y = 'Latitude') +
         theme_bw()
@@ -123,8 +123,8 @@ cleanplot <- function(dat, highlight = NULL, highlight_only = F){
                xmin = mindate,
                xmax = maxdate,
                ymin = 41.32, ymax = 41.52, fill = 'lightblue') +
-      geom_line(data = TS, aes(x = date, y = TS, group = trans), color = 'gray') +
-      geom_line(aes(x = date, y = value), lwd = 1.5) +
+      geom_line(data = TS, aes(x = date, y = TS, group = trans)) +
+      geom_line(aes(x = date, y = value), size = 1.5) +
       scale_x_date(limits = c(as.Date('2017-04-01'), as.Date('2017-07-01'))) +
       labs(x = NULL, y = 'Latitude') +
       theme_bw()
@@ -138,10 +138,11 @@ p2017 <- cleanplot('r_series17',
   theme(axis.text = element_text(size = 16),
         axis.title = element_text(size = 16),
         strip.text = element_text(size = 16),
-        axis.title.x=element_blank(),
-        axis.text.x=element_blank(),
+        axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
         plot.margin = unit(c(0.2, 0.2, 0.1, 0.05), "cm"),
         strip.background = element_blank())
+p2017
 
 p2018 <- cleanplot('r_series18',
                    highlight = all_clust[all_clust$cluster17 != all_clust$pred18,]$transmitter) +
