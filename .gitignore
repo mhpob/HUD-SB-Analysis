@@ -38,6 +38,11 @@ vignettes/*.pdf
 *.rda
 *.csv
 *.db
+*.gpkg
 
 # Images
 *.tif
+*.eps
+*.png
+*.jpg
+*.ai
