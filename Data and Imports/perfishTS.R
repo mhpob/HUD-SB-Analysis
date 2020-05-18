@@ -121,11 +121,11 @@ agg.pad.spl <- lapply(agg.pad.spl, function(y){
     hold[hold$doy %in%
            c(seq(min(hud.doy.seq), min(x$doy) - 2, by = 1),
              seq(max(x$doy) + 2, max(hud.doy.seq), by = 1)),
-         ]$avg.pad <- 40.85
+         ]$avg.pad <- 41
     hold[hold$doy %in%
            c(seq(min(hud.doy.seq), min(x$doy) - 2, by = 1),
              seq(max(x$doy) + 2, max(hud.doy.seq), by = 1)),
-         ]$max.pad <- 40.85
+         ]$max.pad <- 41
 
     hold$avg.imp <- na_ma(hold$avg.pad, k = 2)
     hold$max.imp <- na_ma(hold$max.pad, k = 2)

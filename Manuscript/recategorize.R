@@ -29,13 +29,15 @@ plot(clust17)
 pred18 <- predict(clust17, r_series18)
 
 
-all_clust <- inner_join(tibble(transmitter = names(clust17@datalist),
+all_clust <- left_join(tibble(transmitter = names(clust17@datalist),
                                cluster17 = as.numeric(clust17@cluster)),
                         tibble(transmitter = names(pred18), pred18 = pred18)) %>%
   left_join(agg.pos.imp %>%
               ungroup() %>%
               filter(!is.na(region)) %>%
               distinct(transmitter, region))
+
+# write.csv(all_clust, 'manuscript/recategorized.csv', row.names = F)
 
 xtabs(~ cluster17 + pred18, data = all_clust)
 chisq.test(xtabs(~ cluster17 + pred18, data = all_clust))
@@ -77,7 +79,7 @@ cleanplot <- function(dat, highlight = NULL, highlight_only = F){
 
     if(highlight_only == T){
       ggplot(cents) +
-        facet_wrap(~cent) + ylim(40.8, 42.75) +
+        facet_wrap(~cent) + ylim(40.95, 42.75) +
         annotate('rect',
                  xmin = mindate,
                  xmax = maxdate,
@@ -94,7 +96,7 @@ cleanplot <- function(dat, highlight = NULL, highlight_only = F){
         theme_bw()
     } else{
       ggplot(cents) +
-        facet_wrap(~cent) + ylim(40.8, 42.75) +
+        facet_wrap(~cent) + ylim(40.95, 42.75) +
         annotate('rect',
                  xmin = mindate,
                  xmax = maxdate,
@@ -107,7 +109,10 @@ cleanplot <- function(dat, highlight = NULL, highlight_only = F){
         geom_line(aes(x = date, y = value), size = 2.5) +
         geom_line(data = TS_highlight, aes(x = date, y = TS, group = trans),
                   color = 'red', size = 1.5) +
-        scale_x_date(limits = c(as.Date('2017-04-01'), as.Date('2017-07-01'))) +
+        scale_x_date(breaks = 'month',
+                     date_labels = '%b',
+                     limits = c(as.Date('2017-04-01'), as.Date('2017-06-30')),
+                     expand = c(0, 0)) +
         labs(x = NULL, y = 'Latitude') +
         theme_bw()
     }
@@ -141,8 +146,9 @@ p2017 <- cleanplot('r_series17',
         axis.title.x = element_blank(),
         axis.text.x = element_blank(),
         plot.margin = unit(c(0.2, 0.2, 0.1, 0.05), "cm"),
-        strip.background = element_blank())
-p2017
+        strip.background = element_blank(),
+        panel.spacing.x = unit(1, 'lines'))
+# p2017
 
 p2018 <- cleanplot('r_series18',
                    highlight = all_clust[all_clust$cluster17 != all_clust$pred18,]$transmitter) +
@@ -152,9 +158,10 @@ p2018 <- cleanplot('r_series18',
         strip.text = element_text(size = 16),
         plot.margin = unit(c(0, 0.2, 0.1, 0.05), "cm"),
         strip.background = element_blank(),
-        strip.text.x = element_blank())
+        strip.text.x = element_blank(),
+        panel.spacing.x = unit(1, 'lines'))
 
-p2018
+# p2018
 library(patchwork)
 
 p2017 / p2018

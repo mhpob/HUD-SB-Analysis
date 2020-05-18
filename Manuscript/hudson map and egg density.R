@@ -55,7 +55,9 @@ library(sf)
 midatl <- st_read(file.path('p:/obrien/biotelemetry/past sb/past-analysis',
                             'manuscript/plos one/atlcoast.gpkg'))
 hud_base <- st_crop(midatl, xmin = -74.1, xmax = -73.6, ymin = 40.59, ymax = 42.77)
-plot_points <- fread('p:/obrien/biotelemetry/hudson sb/hudsonpoints.csv')
+plot_points <- data.table(readRDS('data and imports/hud_detects.RDS'))[
+  grepl('West|Below|Betw|Sau|Above', array) & date.local < '2019-01-01']
+plot_points <- unique(plot_points, by = 'station')
 
 hudson <-
   ggplot() +
@@ -69,14 +71,14 @@ hudson <-
            ymin = 42.07, ymax = 42.36, color = 'black', fill = NA) +
   annotate('rect', xmin = -74.05, xmax = -73.9,
            ymin = 41.32, ymax = 41.52, color = 'black', fill = NA) +
-  geom_point(data = plot_points[Type == 'Receiver'],
-             aes(x = Long, y = Lat), size = 3.5, pch = 1) +
+  geom_point(data = plot_points,
+             aes(x = long, y = lat), size = 3.5, pch = 1) +
   annotate('text', x = -74.1, y = 40.73, label = 'NYC',
-  size = 18 / .pt, hjust = 'right', fontface = 'bold') +
-  annotate('text', x = -74.1, y = 40.85, label = 'GWB',
-           size = 18 / .pt, hjust = 'right', fontface = 'bold') +
+           size = 12 / .pt, hjust = 'right', fontface = 'bold') +
+  annotate('text', x = -74.1, y = 41.07, label = 'TZB',
+           size = 12 / .pt, hjust = 'right', fontface = 'bold') +
   annotate('text', x = -74.1, y = 41.72, label = 'USGS',
-           size = 18 / .pt, hjust = 'right', fontface = 'bold') +
+           size = 12 / .pt, hjust = 'right', fontface = 'bold') +
   labs(x = NULL, y = NULL) +
   theme_bw() +
   theme(axis.text.x = element_blank(),
@@ -88,8 +90,8 @@ rkm <- data.table(rkm = seq(0, 246, 2),
                   latitude = scales::rescale(seq(0, 246, 2), c(40.7, 42.76)))
 
 rkm_axis <- ggplot(data = rkm, aes(y = latitude)) +
-  scale_y_continuous(labels =  rkm[seq(1, 124, 40)][, rkm],
-                     breaks = rkm[seq(1, 124, 40)][, latitude]) +
+  scale_y_continuous(labels =  rkm[seq(1, 124, 20)][, rkm],
+                     breaks = rkm[seq(1, 124, 20)][, latitude]) +
   coord_fixed(ratio = 50, ylim = c(40.59, 42.77), expand = F) +
   labs(y = NULL, x = NULL)+
   theme(panel.background = element_blank(),
