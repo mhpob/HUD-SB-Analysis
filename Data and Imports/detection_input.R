@@ -39,15 +39,17 @@ array_greps <- list(
   'MA' = paste0('barns|^b[bh]|buzz|ca\\d|ccc|(chat|hing)ham|ledge|beach|cutty|',
                 'ellis|gurnet|town|hull|m[ao]nom|mar[bst]|comb|merri|musk|',
                 'noman|orl|ph\\d|RI$|rocky|sandw|scit|shark|taun|vs|well|^ei|',
-                '^pamet|truro|chs|sippi|mmk|sud|joppa|dart'),
+                '^pamet|truro|chs|sippi|mmk|sud|joppa|dart|offshore|matta|denn|',
+                'marco|rock h|race'),
   'LI Sound' = 'east r|matti|thames',
   'NY Coast' = 'ltb|[ny] (ea|we)|e\\.c|junc|ique|stony|nywea|mb |moriches',
-  'NJ Coast' = 'opt|garden|egg|barne|chapel|raritan|sandy hook',
+  'NJ Coast' = 'opt|garden|egg|barne|chapel|raritan|sandy hook|NJ\\d',
   'DE Coast' = 'BOEM',
   'DE' = 'C&D|LL# [23]... |de |NJDB',
   'MD Coast' = '([at]|cs)-|inner|outer|middle|[iao][nms]\\d',
   'VA Coast' = 'scl|^wea|ncc|^cb(\\d| )|2c |^cb$',
-  'Ches' = 'cbbt|^york|^b\\d|kent|cedar|ts\\d|tang|poco|rapp|pian|poq|mob|comfort'
+  'Ches' = paste0('cbbt|^york|^b\\d|kent|cedar|ts\\d|tang|poco|rapp|pian|poq|mob|',
+                  'comfort|cb.*lb')
 )
 
 station_list <- lapply(array_greps,
@@ -82,6 +84,14 @@ if(dim(dplyr::filter(hud_detects, is.na(array)))[1] > 1){
 saveRDS(hud_detects, file = 'hud_detects.RDS')
 
 rm(sb, array_greps, station_list, grep_check, i)
+
+
+# Manual regex check
+# library(dplyr)
+# hold <- filter(hud_detects, is.na(array)) %>%
+#   distinct(station, lat, long, file)
+#
+# grep('race', unique(hud_detects$station), ignore.case = T, value = T)
 
 
 # Visual array assignment check
