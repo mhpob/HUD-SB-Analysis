@@ -34,7 +34,9 @@ det_ecdf <- dets %>%
   group_by(cluster17, transmitter, year,sex) %>%
   summarize(min = min(date.local)) %>%
   # Make a dummy date with the same year to align dates when plotting
-  mutate(dummy.date = min)
+  mutate(dummy.date = min) %>%
+  # Remove 11424 in 2018, as it's likely false
+  filter(!(grepl('11424', transmitter) & year == 2018))
 
 # Assign the year 2017 to dummy date
 year(det_ecdf$dummy.date) <- 2017
@@ -51,6 +53,9 @@ d50 <- cbind(d50,
              d50 = .POSIXct(apply(d50, 1,
                                   function(x) summary(d50_f[[x[1]]][[x[2]]])[3]))) %>%
   mutate(date.floor = floor_date(d50, 'day'))
+usgs_data %>%
+  filter(date(date.local) %in% date(d50$date.floor),
+         grepl('pough', site_name))
 
 for(i in 1:nrow(det_ecdf)){
   det_ecdf[i, 'frac'] <-  d50_f[[as.character(data.frame(det_ecdf)[i, 3])
@@ -64,7 +69,7 @@ arrival <-
             stat = 'ecdf', pad = F,
             size = 2) +
   scale_color_discrete()+
-  xlim(as.POSIXct('2017-04-01'), as.POSIXct('2017-06-10')) +
+  xlim(as.POSIXct('2017-04-01'), as.POSIXct('2017-06-01')) +
   ylab('Cumulative fraction detected') +
   facet_wrap(~ year) +
   theme_bw() +
@@ -82,7 +87,7 @@ swt <-
                           usgs_data$year %in% 2017:2018,]) +
   geom_line(aes(x = dummy.date, mwt), size = 1) +
   # geom_point(data = d50, aes(x = d50)) +
-  xlim(as.POSIXct('2017-04-01'), as.POSIXct('2017-06-10')) +
+  xlim(as.POSIXct('2017-04-01'), as.POSIXct('2017-06-01')) +
   ylim(0, 25) +
   ylab('Water temperature (°C)') +
   facet_wrap(~ year) +
@@ -100,7 +105,7 @@ disch <-
   ggplot(data = usgs_data[grepl('pough', usgs_data$site_name) &
                           usgs_data$year %in% 2017:2018,]) +
   geom_line(aes(x = dummy.date, y = mdisch / 1000), size = 1) +
-  xlim(as.POSIXct('2017-04-01'), as.POSIXct('2017-06-10')) +
+  xlim(as.POSIXct('2017-04-01'), as.POSIXct('2017-06-01')) +
   labs(x = NULL, y = bquote("Discharge"~("1000"~m^3/s))) +
   facet_wrap(~ year) +
     theme_bw() +
@@ -120,5 +125,12 @@ ggsave("manuscript/ecdf_2017cluster.tif", combined,
 
 
 ### Find times and corresponding values ----
+plot(frac ~ min, data = det_ecdf,
+     subset = (cluster17 == 'Lower' & year == 2018))
 
-
+hold <- locator()
+hold$x <- .POSIXct(hold$x)
+usgs_data %>%
+  filter(date(date.local) %in% date(hold$x),
+         grepl('pough', site_name)) %>%
+  select(date.local, min_wt, mwt, max_wt)
