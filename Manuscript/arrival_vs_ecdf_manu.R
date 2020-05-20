@@ -53,8 +53,8 @@ d50 <- cbind(d50,
   mutate(date.floor = floor_date(d50, 'day'))
 
 for(i in 1:nrow(det_ecdf)){
-  det_ecdf[i, 'frac'] <-  d50_f[[as.character(det_ecdf[i, 3])
-                                 ]][[as.character(det_ecdf[i, 1])
+  det_ecdf[i, 'frac'] <-  d50_f[[as.character(data.frame(det_ecdf)[i, 3])
+                                 ]][[as.character(data.frame(det_ecdf)[i, 1])
                                      ]](det_ecdf$min[i])
 }
 
@@ -116,3 +116,9 @@ combined <- arrival / (swt / disch)
 ggsave("manuscript/ecdf_2017cluster.tif", combined,
        width = 7.5, height = 7.5, units = 'in',
        device = 'tiff', compression = 'lzw')
+
+
+
+### Find times and corresponding values ----
+
+
