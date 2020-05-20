@@ -22,9 +22,16 @@ dets <- readRDS('data and imports/hud_detects.RDS') %>%
   mutate(year = year(date.local),
          date.floor = floor_date(date.local, 'day'))
 
+recats <- read.csv('manuscript/recategorized.csv')
+recats <- recats %>%
+  mutate(cluster17 = ifelse(cluster17 == 1, 'Upper','Lower'),
+         cluster17 = factor(cluster17, levels = c('Upper', 'Lower'), ordered = T),
+         pred18 = ifelse(pred18 == 1, 'Upper','Lower'),
+         pred18 = factor(pred18, levels = c('Upper', 'Lower'), ordered = T))
+dets <- left_join(dets, recats, by = 'transmitter')
 
 det_ecdf <- dets %>%
-  group_by(array, transmitter, year,sex) %>%
+  group_by(cluster17, transmitter, year,sex) %>%
   summarize(min = min(date.local)) %>%
   # Make a dummy date with the same year to align dates when plotting
   mutate(dummy.date = min)
@@ -35,11 +42,11 @@ year(det_ecdf$dummy.date) <- 2017
 
 # Find date at 50%
 d50_f <- split(det_ecdf, det_ecdf$year)
-d50_f <- lapply(d50_f, function(x) split(x, x$array))
+d50_f <- lapply(d50_f, function(x) split(x, x$cluster17))
 d50_f <- lapply(d50_f, function(x) lapply(x, function(y) ecdf(y$min)))
 
 d50 <- expand.grid(year = c(2017, 2018),
-                   array = c('West Point-Newburgh', 'Saugerties-Coxsackie'))
+                   cluster17 = c('Lower', 'Upper'))
 d50 <- cbind(d50,
              d50 = .POSIXct(apply(d50, 1,
                                   function(x) summary(d50_f[[x[1]]][[x[2]]])[3]))) %>%
@@ -48,18 +55,15 @@ d50 <- cbind(d50,
 for(i in 1:nrow(det_ecdf)){
   det_ecdf[i, 'frac'] <-  d50_f[[as.character(det_ecdf[i, 3])
                                  ]][[as.character(det_ecdf[i, 1])
-                                     ]](det_ecdf[i, 5])
+                                     ]](det_ecdf$min[i])
 }
 
 arrival <-
-  ggplot(data = det_ecdf[det_ecdf$array %in%
-                         c('West Point-Newburgh', 'Saugerties-Coxsackie'),]) +
-  geom_step(aes(x = dummy.date, group = array), color = 'gray',
-            stat = 'ecdf', pad = F) +
-  geom_step(aes(x = dummy.date, color = array, linetype = sex),
+  ggplot(data = filter(det_ecdf, !is.na(cluster17))) +
+  geom_step(aes(x = dummy.date, color = cluster17),
             stat = 'ecdf', pad = F,
             size = 2) +
-
+  scale_color_discrete()+
   xlim(as.POSIXct('2017-04-01'), as.POSIXct('2017-06-10')) +
   ylab('Cumulative fraction detected') +
   facet_wrap(~ year) +
@@ -79,6 +83,7 @@ swt <-
   geom_line(aes(x = dummy.date, mwt), size = 1) +
   # geom_point(data = d50, aes(x = d50)) +
   xlim(as.POSIXct('2017-04-01'), as.POSIXct('2017-06-10')) +
+  ylim(0, 25) +
   ylab('Water temperature (°C)') +
   facet_wrap(~ year) +
     theme_bw() +
@@ -88,7 +93,7 @@ swt <-
           axis.text.x = element_blank(),
           axis.text.y = element_text(size = 9),
           axis.title.y = element_text(size = 11),
-          panel.grid.minor.x = element_blank())
+          panel.grid.minor = element_blank())
 
 
 disch <-
@@ -108,6 +113,6 @@ disch <-
 library(patchwork)
 combined <- arrival / (swt / disch)
 
-ggsave("manuscript/ecdf_sex.tif", combined,
+ggsave("manuscript/ecdf_2017cluster.tif", combined,
        width = 7.5, height = 7.5, units = 'in',
        device = 'tiff', compression = 'lzw')

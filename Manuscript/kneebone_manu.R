@@ -6,17 +6,23 @@ hud_detects <- hud_detects %>%
   filter(date.floor < lubridate::ymd('2019-01-01', tz = 'America/New_York')) %>%
   mutate(year = lubridate::year(date.local),
          doy = lubridate::yday(date.local),
-         array = ifelse(grepl('Ab|Be|Saug|Newb', array), 'Hudson', array),
+         array = case_when(grepl('Ab|Be|Saug|Newb', array) ~ 'Hudson',
+                           grepl('N[JY]', array) ~ 'NYB',
+                           array == 'Ches' ~ 'CH',
+                           array == 'LI Sound' ~ 'LIS',
+                           T ~ gsub(' .*', '', array)),
          array = factor(array,
-                        levels = c('Ches', 'VA Coast', 'MD Coast', 'DE Coast',
-                                   'DE', 'NJ Coast', 'NY Coast', 'Hudson',
-                                   'LI Sound', 'MA', 'ME'), ordered = T))
+                        levels = c('CH', 'VA', 'MD', 'DE', 'Hudson', 'NYB',
+                                   'LIS', 'MA', 'ME'), ordered = T))
 
 reduced_pts <- distinct(hud_detects, transmitter, doy, array, .keep_all = T) %>%
-  mutate(recat_region = factor(recat_region,
+  mutate(recat_region = case_when(recat_region == 'West Point-Newburgh' ~ 'Lower',
+                                  recat_region == 'Saugerties-Coxsackie' ~ 'Upper',
+                                  T ~ 'Other'),
+         recat_region = factor(recat_region,
                                levels = c('Other',
-                                          'West Point-Newburgh',
-                                          'Saugerties-Coxsackie'),
+                                          'Lower',
+                                          'Upper'),
                                ordered = T))
 
 library(ggplot2)
@@ -33,13 +39,13 @@ ggplot() + geom_point(data = filter(reduced_pts,
   facet_wrap(~ year) +
   labs(x = NULL, y = 'Day of Year', color = "2017 Spawning Region") +
   theme_bw() +
-  theme(legend.position = c(0.02, 0.5),
+  theme(legend.position = c(0.02, 0.3),
         legend.justification = c(0, 1),
         legend.text = element_text(size = 12),
         legend.title = element_text(size = 12),
         strip.background = element_rect(fill = NA),
         strip.text = element_text(size = 12),
-        axis.text.y.left = element_text(angle = 35),
+        # axis.text.y.left = element_text(angle = 35),
         axis.text.y = element_text(size = 10),
         axis.title.x=element_text(size = 12),
         axis.text.x=element_text(size = 12),
