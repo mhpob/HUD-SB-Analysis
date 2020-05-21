@@ -11,10 +11,10 @@ loss_overall$date <- lubridate::floor_date(loss_overall$date)
 loss_plot <- ggplot() +
   geom_line(data = loss_overall, aes(x = date, y = remaining), lwd = 1.5) +
   labs(x = NULL, y = 'Fish Remaining') +
-  scale_x_datetime(date_breaks = '4 month',
+  scale_x_datetime(date_breaks = '6 month',
                    date_labels = '%b %Y',
                    limits = c(as.POSIXct('2016-05-01 00:00:00'),
-                              as.POSIXct('2018-12-31 00:00:00'))) +
+                              as.POSIXct('2019-04-20 00:00:00'))) +
   theme_bw() +
   theme(axis.text = element_text(size = 15),
         axis.title.y = element_text(size = 15),
@@ -154,23 +154,24 @@ max_det <- recats[, -'region'][max_det, on = 'transmitter']
 # code surviving with max date and 0, everything else with 1
 
 surv_overall <- max_det[max_date > '2017-05-01']
-surv_overall[, ':='(max_c17 = ifelse(max_date > '2018-12-01',
-                                  (as.numeric(as.POSIXct('2018-12-01')) -
+surv_overall[, ':='(max_c17 = ifelse(max_date > '2018-12-31',
+                                  (as.numeric(as.POSIXct('2018-12-31')) -
                                      as.numeric(as.POSIXct('2017-05-01'))) /
                                     (60 * 60 * 24),
                                   (as.numeric(max_date) -
                                      as.numeric(as.POSIXct('2017-05-01'))) /
                                     (60 * 60 * 24)),
-                 status = ifelse(max_date > '2018-12-01', 0, 1))]
+                 status = ifelse(max_date > '2018-12-31', 0, 1))]
 
 
 sall_mod <- survfit(Surv(max_c17, status) ~  cluster17, data = surv_overall)
 survdiff(Surv(max_c17, status) ~  cluster17, data = surv_overall, rho = 1)
+plot(sall_mod, conf.int = T, col = c(1, 2))
 
-ggsurvplot(sall_mod,
-           conf.int = T,
-           risk.table = T,
-           pval = T)
+# survminer::ggsurvplot(sall_mod,
+#            conf.int = T,
+#            risk.table = T,
+#            pval = T)
 
 
 
@@ -189,6 +190,7 @@ surv_17[, ':='(max_c17 = ifelse(max_date > '2017-12-31',
 
 s17_mod <- survfit(Surv(max_c17, status) ~  cluster17, data = surv_17)
 survdiff(Surv(max_c17, status) ~  cluster17, data = surv_17, rho = 1)
+plot(s17_mod, conf.int = T, col = c(1, 2))
 
 ggsurvplot(s17_mod,
            conf.int = T,
@@ -198,18 +200,19 @@ ggsurvplot(s17_mod,
 
 
 surv_18 <- max_det[max_date > '2018-05-01']
-surv_18[, ':='(max_c17 = ifelse(max_date > '2018-12-01',
-                            (as.numeric(as.POSIXct('2018-12-01')) -
+surv_18[, ':='(max_c17 = ifelse(max_date > '2018-12-31',
+                            (as.numeric(as.POSIXct('2018-12-31')) -
                                as.numeric(as.POSIXct('2018-05-01'))) /
                               (60 * 60 * 24),
                             (as.numeric(max_date) -
                                as.numeric(as.POSIXct('2018-05-01'))) /
                               (60 * 60 * 24)),
-           status = ifelse(max_date > '2018-12-01', 0, 1))]
+           status = ifelse(max_date > '2018-12-31', 0, 1))]
 
 
 s18_mod <- survfit(Surv(max_c17, status) ~  cluster17, data = surv_18)
 survdiff(Surv(max_c17, status) ~  cluster17, data = surv_18, rho = 1)
+plot(s18_mod, conf.int = T, col = c(1, 2))
 
 ggsurvplot(s18_mod,
            conf.int = T,
