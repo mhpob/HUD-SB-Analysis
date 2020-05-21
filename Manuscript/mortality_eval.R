@@ -5,8 +5,6 @@ detects <- detects[, tagging.region := ifelse(grepl('West', tagging.region),
                                               'Lower', 'Upper')]
 
 recats <- fread('manuscript/recategorized.csv')
-recats <- recats[, ':='(cluster17 = ifelse(cluster17 == 1, 'Upper','Lower'),
-                        pred18 = ifelse(pred18 == 1, 'Upper','Lower'))]
 
 detects <- recats[, -'region'][detects, on = 'transmitter']
 

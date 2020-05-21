@@ -18,15 +18,14 @@ year(usgs_data$dummy.date) <- 2017
 dets <- readRDS('data and imports/hud_detects.RDS') %>%
   filter(grepl('Above|Saug|Between|Newb|Below', array),
          date.local >= '2017-01-01',
+         date.local <= '2018-12-31',
          month(date.local) %in% 3:7) %>%
   mutate(year = year(date.local),
          date.floor = floor_date(date.local, 'day'))
 
 recats <- read.csv('manuscript/recategorized.csv')
 recats <- recats %>%
-  mutate(cluster17 = ifelse(cluster17 == 1, 'Upper','Lower'),
-         cluster17 = factor(cluster17, levels = c('Upper', 'Lower'), ordered = T),
-         pred18 = ifelse(pred18 == 1, 'Upper','Lower'),
+  mutate(cluster17 = factor(cluster17, levels = c('Upper', 'Lower'), ordered = T),
          pred18 = factor(pred18, levels = c('Upper', 'Lower'), ordered = T))
 dets <- left_join(dets, recats, by = 'transmitter')
 
@@ -118,7 +117,7 @@ disch <-
 library(patchwork)
 combined <- arrival / (swt / disch)
 
-ggsave("manuscript/ecdf_2017cluster.tif", combined,
+ggsave("manuscript/ecdf_2017cluster_tzb.tif", combined,
        width = 7.5, height = 7.5, units = 'in',
        device = 'tiff', compression = 'lzw')
 

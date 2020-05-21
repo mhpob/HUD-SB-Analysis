@@ -1,10 +1,17 @@
 library(dplyr)
 hud_detects <- readRDS('data and imports/hud_detects.rds')
 
+recats <- read.csv('manuscript/recategorized.csv')
+recats <- recats %>%
+  mutate(
+         pred18 = factor(pred18, levels = c('Upper', 'Lower'), ordered = T))
+
 hud_detects <- hud_detects %>%
-  left_join(readRDS('data and imports/recat_spawning_region.rds')) %>%
+  left_join(recats, by = 'transmitter') %>%
   filter(date.floor < lubridate::ymd('2019-01-01', tz = 'America/New_York')) %>%
-  mutate(year = lubridate::year(date.local),
+  mutate(cluster17 = ifelse(is.na(cluster17), 'Other', cluster17),
+         cluster17 = factor(cluster17, levels = c('Other', 'Lower', 'Upper'), ordered = T),
+         year = lubridate::year(date.local),
          doy = lubridate::yday(date.local),
          array = case_when(grepl('Ab|Be|Saug|Newb', array) ~ 'Hudson',
                            grepl('N[JY]', array) ~ 'NYB',
@@ -15,20 +22,11 @@ hud_detects <- hud_detects %>%
                         levels = c('CH', 'VA', 'MD', 'DE', 'Hudson', 'NYB',
                                    'LIS', 'MA', 'ME'), ordered = T))
 
-reduced_pts <- distinct(hud_detects, transmitter, doy, array, .keep_all = T) %>%
-  mutate(recat_region = case_when(recat_region == 'West Point-Newburgh' ~ 'Lower',
-                                  recat_region == 'Saugerties-Coxsackie' ~ 'Upper',
-                                  T ~ 'Other'),
-         recat_region = factor(recat_region,
-                               levels = c('Other',
-                                          'Lower',
-                                          'Upper'),
-                               ordered = T))
+reduced_pts <- distinct(hud_detects, transmitter, doy, array, .keep_all = T)
 
 library(ggplot2)
-ggplot() + geom_point(data = filter(reduced_pts,
-                                              !is.na(recat_region)),
-                                aes(x = array, y = doy, color = recat_region),
+ggplot() + geom_point(data = reduced_pts,
+                                aes(x = array, y = doy, color = cluster17),
                                 position = position_dodge(width = 0.3)) +
   # position_dodge() only works horizontally; have to plot x on y and coord_flip
   coord_flip() +

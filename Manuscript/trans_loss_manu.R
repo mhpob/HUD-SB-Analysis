@@ -135,8 +135,7 @@ ggplot() +
 
 
 
-## Survival
-library(survminer)
+## Survival ----
 library(survival)
 library(ggplot2); library(data.table)
 detects <- data.table(readRDS('data and imports/hud_detects.RDS'))
@@ -147,8 +146,6 @@ max_det <- detects[, .(max_date = max(date.local)),
                    by = c('transmitter', 'tagging.region')]
 
 recats <- fread('manuscript/recategorized.csv')
-recats <- recats[, ':='(cluster17 = ifelse(cluster17 == 1, 'Upper','Lower'),
-                        pred18 = ifelse(pred18 == 1, 'Upper','Lower'))]
 max_det <- recats[, -'region'][max_det, on = 'transmitter']
 
 
@@ -169,13 +166,6 @@ sall_mod <- survfit(Surv(max_c17, status) ~  cluster17, data = surv_overall)
 survdiff(Surv(max_c17, status) ~  cluster17, data = surv_overall, rho = 1)
 plot(sall_mod, conf.int = T, col = c(1, 2))
 
-# survminer::ggsurvplot(sall_mod,
-#            conf.int = T,
-#            risk.table = T,
-#            pval = T)
-
-
-
 
 
 surv_17 <- max_det[max_date >= '2017-05-01' & !is.na(cluster17)]
@@ -190,13 +180,9 @@ surv_17[, ':='(max_c17 = ifelse(max_date >= '2018-01-01',
 
 
 s17_mod <- survfit(Surv(max_c17, status) ~  cluster17, data = surv_17)
+summary(s17_mod)
 survdiff(Surv(max_c17, status) ~  cluster17, data = surv_17, rho = 1)
 plot(s17_mod, conf.int = T, col = c(1, 2))
-
-ggsurvplot(s17_mod,
-           conf.int = T,
-           risk.table = T,
-           pval = T)
 
 
 
@@ -212,13 +198,9 @@ surv_18[, ':='(max_c17 = ifelse(max_date >= '2019-01-01',
 
 
 s18_mod <- survfit(Surv(max_c17, status) ~  cluster17, data = surv_18)
+summary(s18_mod)
 survdiff(Surv(max_c17, status) ~  cluster17, data = surv_18, rho = 1)
 plot(s18_mod, conf.int = T, col = c(1, 2))
-
-ggsurvplot(s18_mod,
-           conf.int = T,
-           risk.table = T,
-           pval = T)
 
 
 

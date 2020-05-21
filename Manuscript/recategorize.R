@@ -35,16 +35,36 @@ all_clust <- left_join(tibble(transmitter = names(clust17@datalist),
   left_join(agg.pos.imp %>%
               ungroup() %>%
               filter(!is.na(region)) %>%
-              distinct(transmitter, region))
+              distinct(transmitter, region)) %>%
+  mutate(cluster17 = ifelse(cluster17 == 1, 'Upper', 'Lower'),
+         pred18 = ifelse(pred18 == 1, 'Upper', 'Lower'),
+         region = ifelse(grepl('West', region), 'Lower', 'Upper'))
 
 # write.csv(all_clust, 'manuscript/recategorized.csv', row.names = F)
 
 xtabs(~ cluster17 + pred18, data = all_clust)
 chisq.test(xtabs(~ cluster17 + pred18, data = all_clust))
-chisq.test(xtabs(~ region + cluster17, data = all_clust))
-chisq.test(xtabs(~ region + pred18, data = all_clust))
+chisq.test(xtabs(~ cluster17 + region, data = all_clust))
+chisq.test(xtabs(~ pred18 + region, data = all_clust))
 
 
+#Run summary ----
+library(data.table)
+entry_exit <- setDT(all_clust)[setDT(agg.pos.imp), on = 'transmitter']
+entry_exit <- entry_exit[,.(entry = min(dummydoy),
+                                    exit = max(dummydoy)),
+                                 by = c('year', 'transmitter', 'cluster17')]
+entry_exit[, .(min.entry = min(entry),
+               med.entry = median(entry),
+               max.entry = max(entry),
+               min.exit = min(exit),
+               med.exit = median(exit),
+               max.exit = max(exit)),
+           by = c('year', 'cluster17')]
+
+
+
+#Plotting ----
 cleanplot <- function(dat, highlight = NULL, highlight_only = F){
   ncentroids <- 2
 
@@ -139,6 +159,9 @@ cleanplot <- function(dat, highlight = NULL, highlight_only = F){
 
 p2017 <- cleanplot('r_series17',
                    highlight = all_clust[all_clust$cluster17 != all_clust$pred18,]$transmitter) +
+  geom_text(data = data.frame(x = as.Date('2017-04-10'), y = 42.7,
+                              lab = '2017', cent = 'Centroid 1'),
+            aes(x = x, y = y, label = lab), size = 16/.pt) +
   labs(x = NULL, y = NULL) +
   theme(axis.text = element_text(size = 16),
         axis.title = element_text(size = 16),
@@ -148,10 +171,13 @@ p2017 <- cleanplot('r_series17',
         plot.margin = unit(c(0.2, 0.2, 0.1, 0.05), "cm"),
         strip.background = element_blank(),
         panel.spacing.x = unit(1, 'lines'))
-# p2017
+p2017
 
 p2018 <- cleanplot('r_series18',
                    highlight = all_clust[all_clust$cluster17 != all_clust$pred18,]$transmitter) +
+  geom_text(data = data.frame(x = as.Date('2017-04-10'), y = 42.7,
+                              lab = '2018', cent = 'Centroid 1'),
+            aes(x = x, y = y, label = lab), size = 16/.pt) +
   labs(y = NULL) +
   theme(axis.text = element_text(size = 16),
         axis.title = element_text(size = 16),
