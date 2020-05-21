@@ -140,10 +140,11 @@ library(survminer)
 library(survival)
 library(ggplot2); library(data.table)
 detects <- data.table(readRDS('data and imports/hud_detects.RDS'))
-detects <- detects[, ':='(region16 = region,
-                          region = ifelse(grepl('West', region),
-                                          'Lower', 'Upper'))]
-max_det <- detects[, .(max_date = max(date.local)), by = c('transmitter', 'region')]
+setnames(detects, 'region', 'tagging.region')
+detects <- detects[, tagging.region := ifelse(grepl('West', tagging.region),
+                                              'Lower', 'Upper')]
+max_det <- detects[, .(max_date = max(date.local)),
+                   by = c('transmitter', 'tagging.region')]
 
 recats <- fread('manuscript/recategorized.csv')
 recats <- recats[, ':='(cluster17 = ifelse(cluster17 == 1, 'Upper','Lower'),
@@ -154,14 +155,14 @@ max_det <- recats[, -'region'][max_det, on = 'transmitter']
 # code surviving with max date and 0, everything else with 1
 
 surv_overall <- max_det[max_date > '2017-05-01']
-surv_overall[, ':='(max_c17 = ifelse(max_date > '2018-12-31',
-                                  (as.numeric(as.POSIXct('2018-12-31')) -
+surv_overall[, ':='(max_c17 = ifelse(max_date >= '2019-01-01',
+                                  (as.numeric(as.POSIXct('2018-12-31 23:59:59')) -
                                      as.numeric(as.POSIXct('2017-05-01'))) /
                                     (60 * 60 * 24),
                                   (as.numeric(max_date) -
                                      as.numeric(as.POSIXct('2017-05-01'))) /
                                     (60 * 60 * 24)),
-                 status = ifelse(max_date > '2018-12-31', 0, 1))]
+                 status = ifelse(max_date >= '2019-01-01', 0, 1))]
 
 
 sall_mod <- survfit(Surv(max_c17, status) ~  cluster17, data = surv_overall)
@@ -177,15 +178,15 @@ plot(sall_mod, conf.int = T, col = c(1, 2))
 
 
 
-surv_17 <- max_det[max_date > '2017-05-01']
-surv_17[, ':='(max_c17 = ifelse(max_date > '2017-12-31',
-                            (as.numeric(as.POSIXct('2017-12-31')) -
+surv_17 <- max_det[max_date >= '2017-05-01' & !is.na(cluster17)]
+surv_17[, ':='(max_c17 = ifelse(max_date >= '2018-01-01',
+                            (as.numeric(as.POSIXct('2017-12-31 23:59:59')) -
                                as.numeric(as.POSIXct('2017-05-01'))) /
                               (60 * 60 * 24),
                             (as.numeric(max_date) -
                                as.numeric(as.POSIXct('2017-05-01'))) /
                               (60 * 60 * 24)),
-           status = ifelse(max_date > '2017-12-31', 0, 1))]
+           status = ifelse(max_date >= '2018-01-01', 0, 1))]
 
 
 s17_mod <- survfit(Surv(max_c17, status) ~  cluster17, data = surv_17)
@@ -199,15 +200,15 @@ ggsurvplot(s17_mod,
 
 
 
-surv_18 <- max_det[max_date > '2018-05-01']
-surv_18[, ':='(max_c17 = ifelse(max_date > '2018-12-31',
-                            (as.numeric(as.POSIXct('2018-12-31')) -
+surv_18 <- max_det[max_date >= '2018-05-01']
+surv_18[, ':='(max_c17 = ifelse(max_date >= '2019-01-01',
+                            (as.numeric(as.POSIXct('2018-12-31 23:59:59')) -
                                as.numeric(as.POSIXct('2018-05-01'))) /
                               (60 * 60 * 24),
                             (as.numeric(max_date) -
                                as.numeric(as.POSIXct('2018-05-01'))) /
                               (60 * 60 * 24)),
-           status = ifelse(max_date > '2018-12-31', 0, 1))]
+           status = ifelse(max_date >= '2019-01-01', 0, 1))]
 
 
 s18_mod <- survfit(Surv(max_c17, status) ~  cluster17, data = surv_18)
