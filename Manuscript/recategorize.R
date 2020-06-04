@@ -35,18 +35,21 @@ all_clust <- left_join(tibble(transmitter = names(clust17@datalist),
   left_join(agg.pos.imp %>%
               ungroup() %>%
               filter(!is.na(region)) %>%
-              distinct(transmitter, region)) %>%
+              distinct(transmitter, region, sex)) %>%
   mutate(cluster17 = ifelse(cluster17 == 1, 'Upper', 'Lower'),
          pred18 = ifelse(pred18 == 1, 'Upper', 'Lower'),
          region = ifelse(grepl('West', region), 'Lower', 'Upper'))
 
 # write.csv(all_clust, 'manuscript/recategorized.csv', row.names = F)
 
+# Test for categorization differences
 xtabs(~ cluster17 + pred18, data = all_clust)
-chisq.test(xtabs(~ cluster17 + pred18, data = all_clust))
-chisq.test(xtabs(~ cluster17 + region, data = all_clust))
-chisq.test(xtabs(~ pred18 + region, data = all_clust))
+chisq.test(xtabs(~ cluster17 + pred18, data = all_clust), correct = F)
+chisq.test(xtabs(~ cluster17 + region, data = all_clust), correct = F)
+chisq.test(xtabs(~ pred18 + region, data = all_clust), correct = F)
 
+# Test for sex differences
+chisq.test(xtabs(~ sex + cluster17, data = all_clust), correct = F)
 
 #Run summary ----
 library(data.table)
