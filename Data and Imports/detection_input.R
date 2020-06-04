@@ -13,7 +13,7 @@ names(sb) <- tolower(names(sb))
 
 cl <- parallel::makeCluster(parallel::detectCores() - 1)
 hud_detects <- TelemetryR::vemsort('p:/obrien/biotelemetry/detections',
-                                   clust = cl, prog_bar = T,
+                                   clust = cl, #prog_bar = T,
                                    creation_date = '2016-01-01')
 parallel::stopCluster(cl)
 
@@ -81,7 +81,7 @@ if(dim(dplyr::filter(hud_detects, is.na(array)))[1] > 1){
   stop('UNID array found!')
 }
 
-saveRDS(hud_detects, file = 'hud_detects.RDS')
+saveRDS(hud_detects, file = 'data and imports/hud_detects.RDS')
 
 rm(sb, array_greps, station_list, grep_check, i)
 
