@@ -126,3 +126,78 @@ euc_plot(warp, match.indices = 30, col = c('blue', 'red'), lty = 1, lwd = 3)
 title(main = 'Euclidean', adj = 0.01, line = 1)
 title(ylab = 'Latitude (°N)', cex.lab = 2, line = 2.5)
 
+## Hack the hack hack to get both plots ----
+# dtw_plot <- function (d, xts = NULL, yts = NULL, offset = 1, ts.type = "l",
+#                       pch = 21, match.indices = NULL,
+#                       match.col = 'gray',  match.lty = 1,
+#                       ylab = '', xlab = '', ...) {
+  if (is.null(xts) || is.null(yts)) {
+    xts <- d$query
+    yts <- d$reference
+  }
+  if (is.null(xts) || is.null(yts))
+    stop("Original timeseries are required")
+  ytso <- yts + offset
+  maxlen <- max(length(xts), length(ytso))
+  length(xts) <- maxlen
+  length(ytso) <- maxlen
+  def.par <- par(no.readonly = TRUE)
+
+  plot_body <- function(){
+    matplot(cbind(xts, ytso), type = ts.type, pch = pch, xlab = xlab,
+            ylab = '', ylim = c(min(xts), max(ytso) + 0.1), axes = FALSE)
+    box()
+    axis(2, at = round(c(min(xts), mean(c(min(xts), max(xts))), max(xts)), 1),
+         cex.axis = 1.25, tcl = -0.25, mgp = c(3 ,0.5, 0))
+    axis(4, at = round(c(min(xts), mean(c(min(xts), max(xts))), max(xts)), 1) + offset,
+         labels = round(c(min(xts), mean(c(min(xts), max(xts))), max(xts)), 1),
+         cex.axis = 1.25, tcl = -0.25, mgp = c(3 ,0.5, 0))
+  }
+
+  plot_segments <- function(type){
+    if(type == 'dtw'){
+      indices <- d$index1
+    }else{
+      indices <- xts
+    }
+
+    if (is.null(match.indices)) {
+      ml <- length(indices)
+      idx <- 1:ml
+    }else if (length(match.indices) == 1) {
+      idx <- seq(from = 1, to = length(indices), length.out = match.indices)
+    }else {
+      idx <- match.indices
+    }
+
+    if(type == 'dtw'){
+      segments(d$index1[idx], xts[d$index1[idx]],
+               d$index2[idx], ytso[d$index2[idx]],
+               col = match.col, lty = match.lty)
+    }else{
+      segments(idx, xts[idx], idx, ytso[idx],
+               col = match.col, lty = match.lty)
+    }
+  }
+
+
+  par(mar = c(0, 4, 0, 3), oma = c(2, 0, 1.5, 0), mfcol = c(2, 1))
+
+  plot_body()
+  title(main = 'Dynamic Time Warping', adj = 0.01, line = -1)
+  axis(1, cex.axis = 1.25, at = seq(1, 88, 14), labels = F, tcl = 0.25)
+  plot_segments(type = 'dtw')
+  plot_body()
+  title(main = 'Euclidean', adj = 0.01, line = -1)
+  axis(1, cex.axis = 1.25, at = seq(1, 88, 14),
+       labels = format(
+         seq.Date(as.Date('2019-04-02'), as.Date('2019-04-01') + 88, by = '14 day'),
+         '%d-%b'))
+  plot_segments(type = 'Euclid')
+  mtext('Latitude (°N)', side = 2, line = -2, outer = T, cex = 1.75)
+
+
+  par(def.par)
+
+
+
