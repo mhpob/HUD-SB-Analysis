@@ -29,10 +29,10 @@ plot(clust17)
 pred18 <- predict(clust17, r_series18)
 
 
-all_clust <- left_join(tibble(transmitter = names(clust17@datalist),
+all_clust <- full_join(tibble(transmitter = names(clust17@datalist),
                                cluster17 = as.numeric(clust17@cluster)),
                         tibble(transmitter = names(pred18), pred18 = pred18)) %>%
-  left_join(agg.pos.imp %>%
+  full_join(agg.pos.imp %>%
               ungroup() %>%
               filter(!is.na(region)) %>%
               distinct(transmitter, region, sex)) %>%
@@ -43,7 +43,7 @@ all_clust <- left_join(tibble(transmitter = names(clust17@datalist),
 # write.csv(all_clust, 'manuscript/recategorized.csv', row.names = F)
 
 # Test for categorization differences
-xtabs(~ cluster17 + pred18, data = all_clust)
+xtabs(~ pred18 + region, data = all_clust)
 chisq.test(xtabs(~ cluster17 + pred18, data = all_clust), correct = F)
 chisq.test(xtabs(~ cluster17 + region, data = all_clust), correct = F)
 chisq.test(xtabs(~ pred18 + region, data = all_clust), correct = F)
@@ -97,71 +97,51 @@ cleanplot <- function(dat, highlight = NULL, highlight_only = F){
   mindate <- as.Date('2017-01-01') + (min(agg.pad.imp$doy) - 1)
   maxdate <- as.Date('2017-01-01') + (max(agg.pad.imp$doy) - 1)
 
+
+  base_plot <- ggplot(cents) +
+    facet_wrap(~cent) + ylim(40.95, 42.75) +
+    annotate('rect',
+             xmin = mindate,
+             xmax = maxdate,
+             ymin = 42.07, ymax = 42.36, fill = 'pink') +
+    annotate('rect',
+             xmin = mindate,
+             xmax = maxdate,
+             ymin = 41.32, ymax = 41.52, fill = 'lightblue') +
+    scale_x_date(breaks = 'month',
+                 date_labels = '%b',
+                 limits = c(as.Date('2017-04-01'), as.Date('2017-06-30')),
+                 expand = c(0, 0))  +
+    labs(x = NULL, y = 'Latitude') +
+    theme_bw()
+
+
   if(!is.null(highlight)){
     TS_highlight <- TS[TS$trans %in% highlight,]
 
     if(highlight_only == T){
-      ggplot(cents) +
-        facet_wrap(~cent) + ylim(40.95, 42.75) +
-        annotate('rect',
-                 xmin = mindate,
-                 xmax = maxdate,
-                 ymin = 42.07, ymax = 42.36, fill = 'pink') +
-        annotate('rect',
-                 xmin = mindate,
-                 xmax = maxdate,
-                 ymin = 41.32, ymax = 41.52, fill = 'lightblue') +
+      base_plot +
         geom_line(data = TS_highlight, aes(x = date, y = TS, group = trans),
                   color = 'red', lwd = 1.5) +
-        geom_line(aes(x = date, y = value), lwd = 1.5) +
-        scale_x_date(limits = c(as.Date('2017-04-01'), as.Date('2017-07-01'))) +
-        labs(x = NULL, y = 'Latitude') +
-        theme_bw()
+        geom_line(aes(x = date, y = value), lwd = 1.5)
+
     } else{
-      ggplot(cents) +
-        facet_wrap(~cent) + ylim(40.95, 42.75) +
-        annotate('rect',
-                 xmin = mindate,
-                 xmax = maxdate,
-                 ymin = 42.07, ymax = 42.36, fill = 'pink') +
-        annotate('rect',
-                 xmin = mindate,
-                 xmax = maxdate,
-                 ymin = 41.32, ymax = 41.52, fill = 'lightblue') +
+      base_plot +
         geom_line(data = TS, aes(x = date, y = TS, group = trans), color = 'gray35') +
         geom_line(aes(x = date, y = value), size = 2.5) +
         geom_line(data = TS_highlight, aes(x = date, y = TS, group = trans),
-                  color = 'red', size = 1.5) +
-        scale_x_date(breaks = 'month',
-                     date_labels = '%b',
-                     limits = c(as.Date('2017-04-01'), as.Date('2017-06-30')),
-                     expand = c(0, 0)) +
-        labs(x = NULL, y = 'Latitude') +
-        theme_bw()
+                  color = 'red', size = 1.5)
     }
 
   } else{
-    ggplot(cents) +
-      facet_wrap(~cent) + ylim(40.8, 42.75) +
-      annotate('rect',
-               xmin = mindate,
-               xmax = maxdate,
-               ymin = 42.07, ymax = 42.36, fill = 'pink') +
-      annotate('rect',
-               xmin = mindate,
-               xmax = maxdate,
-               ymin = 41.32, ymax = 41.52, fill = 'lightblue') +
-      geom_line(data = TS, aes(x = date, y = TS, group = trans)) +
-      geom_line(aes(x = date, y = value), size = 1.5) +
-      scale_x_date(limits = c(as.Date('2017-04-01'), as.Date('2017-07-01'))) +
-      labs(x = NULL, y = 'Latitude') +
-      theme_bw()
+    base_plot +
+      geom_line(data = TS, aes(x = date, y = TS, group = trans), color = 'gray35') +
+      geom_line(aes(x = date, y = value), size = 2.5)
   }
 }
 
 
-p2017 <- cleanplot('r_series17',
-                   highlight = all_clust[all_clust$cluster17 != all_clust$pred18,]$transmitter) +
+p2017 <- cleanplot('r_series17') +
   geom_text(data = data.frame(x = as.Date('2017-04-10'), y = 42.7,
                               lab = '2017', cent = 'Centroid 1'),
             aes(x = x, y = y, label = lab), size = 16/.pt) +
@@ -190,7 +170,7 @@ p2018 <- cleanplot('r_series18',
         strip.text.x = element_blank(),
         panel.spacing.x = unit(1, 'lines'))
 
-# p2018
+p2018
 library(patchwork)
 
 p2017 / p2018
