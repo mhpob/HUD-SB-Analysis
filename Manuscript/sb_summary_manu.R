@@ -19,7 +19,7 @@ ggplot() +
                aes(x = region, y = value, fill = sex)) +
   geom_hline(data = data.frame(variable = rep('TL', 2),
                                y_int =  c(71.1, 101.6)),
-             aes(yintercept = y_int)) +
+             aes(yintercept = y_int), linetype = 'dashed') +
   facet_wrap(~ variable, scales = 'free',
              labeller = labeller(variable = data_lab)) +
   scale_fill_manual(values = c('white', 'gray')) +
@@ -33,3 +33,15 @@ ggplot() +
         legend.text = element_text(size = 12),
         legend.title = element_text(size = 14))
 
+
+# t-test ----
+tl <- unique(detects, by = c('transmitter', 'variable'))[variable == 'TL']
+
+t.test(tl[region == 'Lower']$value, tl[region == 'Upper']$value, var.equal = F)
+t.test(tl[sex == 'Male']$value, tl[sex == 'Female']$value, var.equal = F)
+
+
+wt <-unique(detects, by = c('transmitter', 'variable'))[variable == 'Weight']
+
+t.test(wt[region == 'Lower']$value, wt[region == 'Upper']$value, var.equal = F)
+t.test(wt[sex == 'Male']$value, wt[sex == 'Female']$value, var.equal = F)
