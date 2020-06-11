@@ -32,9 +32,9 @@ library(ggplot2)
 egg_density <- ggplot(data = eggs,
                       aes(x = fdensity, y = latitude, group = region)) +
   annotate('rect', xmin = 0, xmax = 0.75,
-           ymin = 42.07, ymax = 42.36, fill = 'pink') +
+           ymin = 42.07, ymax = 42.36, fill = '#FF7762', alpha = 0.7) +
   annotate('rect', xmin = 0, xmax = 0.75,
-           ymin = 41.32, ymax = 41.52, fill = 'lightblue') +
+           ymin = 41.32, ymax = 41.52, fill = '#7DC6D8', alpha = 0.7) +
   geom_boxplot(outlier.shape = 'circle open') +
   geom_point(shape = 'circle open') +
   labs(x = 'Fractional egg density', y = NULL) +
@@ -42,10 +42,10 @@ egg_density <- ggplot(data = eggs,
   scale_x_continuous(limits = c(0, 0.75), expand = c(0,0)) +
   theme_minimal() +
   theme(axis.text.y = element_blank(),
-        axis.text.x = element_text(size = 12),
-        axis.title.x= element_text(size = 15),
+        axis.text.x = element_text(size = 10),
+        axis.title.x= element_text(size = 12),
         panel.grid.major.y = element_blank(),
-        panel.grid.minor.y = element_blank(), panel.ontop = T)
+        panel.grid.minor.y = element_blank())
 
 
 
@@ -62,9 +62,9 @@ plot_points <- unique(plot_points, by = 'station')
 hudson <-
   ggplot() +
   annotate('rect', xmin = -74, xmax = -73.75,
-           ymin = 42.07, ymax = 42.36, fill = 'pink') +
+           ymin = 42.07, ymax = 42.36, fill = '#FF7762') +
   annotate('rect', xmin = -74.05, xmax = -73.9,
-           ymin = 41.32, ymax = 41.52, fill = 'lightblue') +
+           ymin = 41.32, ymax = 41.52, fill = '#7DC6D8') +
   geom_sf(data = hud_base) +
   coord_sf(xlim = c(-74.1, -73.6), ylim = c(40.59, 42.77), expand = F, clip = 'off') +
   annotate('rect', xmin = -73.95, xmax = -73.75,
@@ -95,10 +95,14 @@ rkm_axis <- ggplot(data = rkm, aes(y = latitude)) +
   coord_fixed(ratio = 50, ylim = c(40.59, 42.77), expand = F) +
   labs(y = NULL, x = NULL)+
   theme(panel.background = element_blank(),
-        axis.text.y = element_text(size = 12),
+        axis.text.y = element_text(size = 11),
         axis.text.x = element_blank(),
         axis.ticks.x = element_blank(),
         axis.line.y = element_line())
 
 library(patchwork)
-rkm_axis + hudson + egg_density + plot_annotation(title = 'R-Km  Latitude')
+fig1 <- rkm_axis + hudson + egg_density + plot_annotation(title = 'R-Km  Latitude')
+
+ggsave("manuscript/figures/submitted/Figure1.tif", fig1,
+       width = 5.2, height = 5.2, units = 'in', dpi = 600,
+       device = 'tiff', compression = 'lzw')
