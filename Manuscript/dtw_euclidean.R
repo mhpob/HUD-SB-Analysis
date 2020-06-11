@@ -45,8 +45,8 @@ dtw_euc_plot <- function (d, xts = NULL, yts = NULL, offset = 1, ts.type = "l",
   def.par <- par(no.readonly = TRUE)
 
   plot_body <- function(){
-    matplot(cbind(xts, ytso), type = ts.type, pch = pch, xlab = xlab,
-            ylab = '', ylim = c(min(xts), max(ytso) + 0.1), axes = FALSE, ...)
+    matlines(cbind(xts, ytso), type = ts.type, pch = pch, xlab = xlab,
+            ylab = '', ylim = c(min(xts), max(ytso) + 0.1), ...)
     box()
     axis(2, at = round(c(min(xts), mean(c(min(xts), max(xts))), max(xts)), 1),
          cex.axis = 1.25, tcl = -0.25, mgp = c(3 ,0.5, 0))
@@ -84,13 +84,22 @@ dtw_euc_plot <- function (d, xts = NULL, yts = NULL, offset = 1, ts.type = "l",
 
   par(mar = c(0, 4, 0, 3), oma = c(2, 0, 1.5, 0), mfcol = c(2, 1))
 
+
+  matplot(cbind(xts, ytso), pch = pch, xlab = xlab, type = 'n',
+           ylab = '', ylim = c(min(xts), max(ytso) + 0.1), axes = FALSE, ...)
+
+  plot_segments(type = 'dtw')
+
   plot_body()
 
   title(main = 'Dynamic Time Warping', adj = 0.01, line = -1)
   axis(1, cex.axis = 1.25, at = seq(1, 88, 14), labels = F, tcl = 0.25)
 
-  plot_segments(type = 'dtw')
 
+  matplot(cbind(xts, ytso), pch = pch, xlab = xlab, type = 'n',
+          ylab = '', ylim = c(min(xts), max(ytso) + 0.1), axes = FALSE, ...)
+
+  plot_segments(type = 'Euclid')
 
   plot_body()
 
@@ -100,7 +109,6 @@ dtw_euc_plot <- function (d, xts = NULL, yts = NULL, offset = 1, ts.type = "l",
          seq.Date(as.Date('2019-04-02'), as.Date('2019-04-01') + 88, by = '14 day'),
          '%d-%b'))
 
-  plot_segments(type = 'Euclid')
 
   mtext('Latitude (°N)', side = 2, line = -2, outer = T, cex = 1.75)
 
@@ -111,5 +119,8 @@ dtw_euc_plot <- function (d, xts = NULL, yts = NULL, offset = 1, ts.type = "l",
 
 
 ## Plot! ----
-dtw_euc_plot(warp, match.indices = 50, col = c('blue', 'red'), lty = 1, lwd = 3)
-dtw_euc_plot(warp, col = c('blue', 'red'), lty = 1, lwd = 3)
+tiff("manuscript/figures/submitted/Figure2.tif",
+     width = 5.2, height = 3.75, units = 'in', compression = 'lzw', res = 600,
+     pointsize = 6)
+dtw_euc_plot(warp, col = c('burlywood', 'burlywood4'), lty = 1, lwd = 3)
+dev.off()
