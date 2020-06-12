@@ -122,6 +122,39 @@ fwrite(agg.pos, 'manuscript/submission/data/spawning_run.csv')
 
 
 
+## Kneebone plot ----
+library(data.table)
+
+# Detection data
+detects <- data.table(readRDS('data and imports/hud_detects.rds'))
+
+# Limit detections to before 2019
+detects <- detects[date.local <= '2019-01-01']
+
+# A bit of manipulation
+detects <- detects[, ':='(transmitter = sub('.*-', '', transmitter),
+                          date = as.Date(date.floor),
+                          day_of_year = yday(date.local),
+                          array = dplyr::case_when(grepl('Ab|Be|Saug|Newb', array) ~ 'Hudson',
+                                                   grepl('N[JY]', array) ~ 'NYB',
+                                                   array == 'Ches' ~ 'CH',
+                                                   array == 'LI Sound' ~ 'LIS',
+                                                   T ~ gsub(' .*', '', array)))]
+
+recat <- fread('manuscript/recategorized.csv')
+recat <- recat[, .(transmitter = sub('.*-' ,'', transmitter),
+                   categorized_2017 = tolower(cluster17),
+                   predicted_2018 = tolower(pred18))]
+
+detects <- recat[detects, on = 'transmitter']
+
+data <- unique(detects, by = c('categorized_2017', 'array', 'date'))
+
+data <- data[, c('categorized_2017', 'date', 'day_of_year', 'array')]
+setorder(data, date, categorized_2017, array)
+
+# Export
+fwrite(data, 'manuscript/submission/data/coastal_migration.csv')
 
 
 

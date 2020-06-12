@@ -22,7 +22,7 @@ hud_detects <- hud_detects %>%
                         levels = c('CH', 'VA', 'MD', 'DE', 'Hudson', 'NYB',
                                    'LIS', 'MA', 'ME'), ordered = T))
 
-reduced_pts <- distinct(hud_detects, transmitter, doy, array, .keep_all = T)
+reduced_pts <- distinct(hud_detects, cluster17, date.floor, array, .keep_all = T)
 
 library(ggplot2)
 fig7 <- ggplot() +
@@ -54,6 +54,6 @@ fig7 <- ggplot() +
         panel.spacing.x = unit(0.01, "lines"))
 
 
-ggsave("manuscript/figures/submitted/Figure7.tif", fig7,
+ggsave("manuscript/submission/figures/Figure7.tif", fig7,
        width = 7.5, height = 3.5, units = 'in',
        device = 'tiff', compression = 'lzw')
