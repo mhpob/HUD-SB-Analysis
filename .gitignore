@@ -39,6 +39,7 @@ vignettes/*.pdf
 *.csv
 *.db
 *.gpkg
+*.zip
 
 # Images
 *.tif
