@@ -92,7 +92,7 @@ dtw_euc_plot <- function (d, xts = NULL, yts = NULL, offset = 1, ts.type = "l",
 
   plot_body()
 
-  title(main = 'Dynamic Time Warping', adj = 0.01, line = -1)
+  title(main = 'Dynamic time warping', adj = 0.01, line = -1)
   axis(1, cex.axis = 1.25, at = seq(1, 88, 14), labels = F, tcl = 0.25)
 
 

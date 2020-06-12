@@ -25,29 +25,35 @@ hud_detects <- hud_detects %>%
 reduced_pts <- distinct(hud_detects, transmitter, doy, array, .keep_all = T)
 
 library(ggplot2)
-ggplot() + geom_point(data = reduced_pts,
-                                aes(x = array, y = doy, color = cluster17),
-                                position = position_dodge(width = 0.3)) +
+fig7 <- ggplot() +
+  geom_point(data = reduced_pts,
+             aes(x = array, y = doy, color = cluster17),
+             position = position_dodge(width = 0.5)) +
   # position_dodge() only works horizontally; have to plot x on y and coord_flip
   coord_flip() +
   # then scale the y axis since it's flipped
   scale_y_continuous(expand = c(0.005, 0)) +
-  scale_color_grey(start = 0.8, end = 0.2,
-                   guide = guide_legend(reverse = T)) +
+  scale_color_manual(values = c('gray', '#7DC6D8','#FF7762'),
+                     guide = guide_legend(reverse = T)) +
   facet_wrap(~ year) +
-  labs(x = NULL, y = 'Day of Year', color = "2017 Spawning Region") +
+  labs(x = NULL, y = 'Day of year', color = "2017 Spawning region") +
   theme_bw() +
-  theme(legend.position = c(0.02, 0.3),
+  theme(legend.position = c(0.02, 0.4),
         legend.justification = c(0, 1),
-        legend.text = element_text(size = 12),
-        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 10),
         strip.background = element_rect(fill = NA),
         strip.text = element_text(size = 12),
         # axis.text.y.left = element_text(angle = 35),
-        axis.text.y = element_text(size = 10),
-        axis.title.x=element_text(size = 12),
-        axis.text.x=element_text(size = 12),
+        axis.text.y = element_text(size = 8),
+        axis.title.x=element_text(size = 10),
+        axis.text.x=element_text(size = 8),
         strip.background.x = element_blank(),
-        strip.text.x = element_text(size = 16),
+        strip.text.x = element_text(size = 12),
         plot.margin = unit(c(0.2, 0.2, 0.1, 0.05), "cm"),
         panel.spacing.x = unit(0.01, "lines"))
+
+
+ggsave("manuscript/figures/submitted/Figure7.tif", fig7,
+       width = 7.5, height = 3.5, units = 'in',
+       device = 'tiff', compression = 'lzw')

@@ -27,7 +27,7 @@ recats <- read.csv('manuscript/recategorized.csv')
 recats <- recats %>%
   mutate(cluster17 = factor(cluster17, levels = c('Upper', 'Lower'), ordered = T),
          pred18 = factor(pred18, levels = c('Upper', 'Lower'), ordered = T))
-dets <- left_join(dets, recats, by = 'transmitter')
+dets <- left_join(dets, recats[, 1:3], by = 'transmitter')
 
 det_ecdf <- dets %>%
   group_by(cluster17, transmitter, year,sex) %>%
@@ -66,20 +66,22 @@ arrival <-
   ggplot(data = filter(det_ecdf, !is.na(cluster17))) +
   geom_step(aes(x = dummy.date, color = cluster17),
             stat = 'ecdf', pad = F,
-            size = 2) +
-  scale_color_discrete()+
+            size = 2, alpha = 0.9) +
+  scale_color_manual(values = c('#FF7762', '#7DC6D8'))+
   xlim(as.POSIXct('2017-04-01'), as.POSIXct('2017-06-01')) +
   ylab('Cumulative fraction detected') +
   facet_wrap(~ year) +
   theme_bw() +
   theme(strip.background = element_blank(),
-        strip.text = element_text(size = 13),
+        strip.text = element_text(size = 10),
         axis.title.x = element_blank(),
         axis.text.x = element_blank(),
-        axis.text.y = element_text(size = 9),
-        axis.title.y = element_text(size = 11),
+        axis.text.y = element_text(size = 8),
+        axis.title.y = element_text(size = 8),
         panel.grid.minor = element_blank(),
-        legend.position = 'none')
+        legend.position = 'none',
+        plot.margin = unit(c(0, 0.2, 0.1, 0.05), "cm"),
+        panel.spacing.x = unit(0.7, 'lines'))
 
 swt <-
   ggplot(data = usgs_data[grepl('pough', usgs_data$site_name) &
@@ -95,9 +97,11 @@ swt <-
           strip.text = element_blank(),
           axis.title.x = element_blank(),
           axis.text.x = element_blank(),
-          axis.text.y = element_text(size = 9),
-          axis.title.y = element_text(size = 11),
-          panel.grid.minor = element_blank())
+          axis.text.y = element_text(size = 8),
+          axis.title.y = element_text(size = 8, hjust = -0.4),
+          panel.grid.minor = element_blank(),
+          plot.margin = unit(c(0, 0.2, 0.1, 0.05), "cm"),
+          panel.spacing.x = unit(0.7, 'lines'))
 
 
 disch <-
@@ -110,15 +114,18 @@ disch <-
     theme_bw() +
   theme(strip.background = element_blank(),
         strip.text = element_blank(),
-        axis.text = element_text(size = 9),
-        axis.title = element_text(size = 11),
-        panel.grid.minor = element_blank())
+        axis.text = element_text(size = 8),
+        axis.text.x = element_text(),
+        axis.title = element_text(size = 8),
+        panel.grid.minor = element_blank(),
+        plot.margin = unit(c(0, 0.2, 0.1, 0.05), "cm"),
+        panel.spacing.x = unit(0.7, 'lines'))
 
 library(patchwork)
 combined <- arrival / (swt / disch)
 
-ggsave("manuscript/ecdf_2017cluster_tzb.tif", combined,
-       width = 7.5, height = 7.5, units = 'in',
+ggsave("manuscript/figures/submitted/Figure6.tif", combined,
+       width = 5.2, height = 5.2, units = 'in',
        device = 'tiff', compression = 'lzw')
 
 

@@ -8,7 +8,6 @@ r_series <- reshape2::dcast(agg.pad.imp, transmitter + year ~ doy,
                             value.var = 'avg.imp')
 
 # Separate years
-r_series17 <- r_series[r_series$year == 2017,]
 row_ts <- function(data, year){
   hold <- data[data$year == year,]
   row.names(hold) <- hold$transmitter
@@ -44,6 +43,7 @@ all_clust <- full_join(tibble(transmitter = names(clust17@datalist),
 
 # Test for categorization differences
 xtabs(~ pred18 + region, data = all_clust)
+xtabs(~ cluster17 + pred18, data = all_clust)
 chisq.test(xtabs(~ cluster17 + pred18, data = all_clust), correct = F)
 chisq.test(xtabs(~ cluster17 + region, data = all_clust), correct = F)
 chisq.test(xtabs(~ pred18 + region, data = all_clust), correct = F)
@@ -103,11 +103,11 @@ cleanplot <- function(dat, highlight = NULL, highlight_only = F){
     annotate('rect',
              xmin = mindate,
              xmax = maxdate,
-             ymin = 42.07, ymax = 42.36, fill = 'pink') +
+             ymin = 42.07, ymax = 42.36, fill = '#FF7762', alpha = 0.7) +
     annotate('rect',
              xmin = mindate,
              xmax = maxdate,
-             ymin = 41.32, ymax = 41.52, fill = 'lightblue') +
+             ymin = 41.32, ymax = 41.52, fill = '#7DC6D8', alpha = 0.7) +
     scale_x_date(breaks = 'month',
                  date_labels = '%b',
                  limits = c(as.Date('2017-04-01'), as.Date('2017-06-30')),
@@ -122,21 +122,23 @@ cleanplot <- function(dat, highlight = NULL, highlight_only = F){
     if(highlight_only == T){
       base_plot +
         geom_line(data = TS_highlight, aes(x = date, y = TS, group = trans),
-                  color = 'red', lwd = 1.5) +
-        geom_line(aes(x = date, y = value), lwd = 1.5)
+                  color = 'red', lwd = 1.2) +
+        geom_line(aes(x = date, y = value), lwd = 1.2)
 
     } else{
       base_plot +
-        geom_line(data = TS, aes(x = date, y = TS, group = trans), color = 'gray35') +
-        geom_line(aes(x = date, y = value), size = 2.5) +
+        geom_line(data = TS, aes(x = date, y = TS, group = trans),
+                  size = 0.25, color = 'gray35') +
+        geom_line(aes(x = date, y = value), size = 1.2) +
         geom_line(data = TS_highlight, aes(x = date, y = TS, group = trans),
-                  color = 'red', size = 1.5)
+                  color = 'red', size = 0.75)
     }
 
   } else{
     base_plot +
-      geom_line(data = TS, aes(x = date, y = TS, group = trans), color = 'gray35') +
-      geom_line(aes(x = date, y = value), size = 2.5)
+      geom_line(data = TS, aes(x = date, y = TS, group = trans),
+                size = 0.2, color = 'gray35') +
+      geom_line(aes(x = date, y = value), size = 1.2)
   }
 }
 
@@ -144,34 +146,38 @@ cleanplot <- function(dat, highlight = NULL, highlight_only = F){
 p2017 <- cleanplot('r_series17') +
   geom_text(data = data.frame(x = as.Date('2017-04-10'), y = 42.7,
                               lab = '2017', cent = 'Centroid 1'),
-            aes(x = x, y = y, label = lab), size = 16/.pt) +
+            aes(x = x, y = y, label = lab), size = 10/.pt) +
   labs(x = NULL, y = NULL) +
-  theme(axis.text = element_text(size = 16),
-        axis.title = element_text(size = 16),
-        strip.text = element_text(size = 16),
+  theme(axis.text.y = element_text(size = 8, angle = 90, hjust = 0.5),
+        strip.text = element_text(size = 12),
         axis.title.x = element_blank(),
         axis.text.x = element_blank(),
         plot.margin = unit(c(0.2, 0.2, 0.1, 0.05), "cm"),
         strip.background = element_blank(),
         panel.spacing.x = unit(1, 'lines'))
-p2017
+# p2017
 
 p2018 <- cleanplot('r_series18',
                    highlight = all_clust[all_clust$cluster17 != all_clust$pred18,]$transmitter) +
   geom_text(data = data.frame(x = as.Date('2017-04-10'), y = 42.7,
                               lab = '2018', cent = 'Centroid 1'),
-            aes(x = x, y = y, label = lab), size = 16/.pt) +
-  labs(y = NULL) +
-  theme(axis.text = element_text(size = 16),
-        axis.title = element_text(size = 16),
-        strip.text = element_text(size = 16),
+            aes(x = x, y = y, label = lab), size = 10/.pt) +
+  labs(y = 'Latitude (°N)') +
+  theme(axis.text.y = element_text(size = 8, angle = 90, hjust = 0.5),
+        axis.text.x = element_text(size = 8),
+        axis.title = element_text(size = 12, hjust = 1.75),
+        strip.text = element_text(size = 12),
         plot.margin = unit(c(0, 0.2, 0.1, 0.05), "cm"),
         strip.background = element_blank(),
         strip.text.x = element_blank(),
         panel.spacing.x = unit(1, 'lines'))
 
-p2018
+# p2018
 library(patchwork)
 
-p2017 / p2018
+fig4 <- p2017 / p2018
 
+
+ggsave("manuscript/figures/submitted/Figure4.tif", fig4,
+       width = 5.2, height = 4, units = 'in', dpi = 600,
+       device = 'tiff', compression = 'lzw')

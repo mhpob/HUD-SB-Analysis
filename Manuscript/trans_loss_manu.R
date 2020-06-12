@@ -203,5 +203,61 @@ survdiff(Surv(max_c17, status) ~  cluster17, data = surv_18, rho = 1)
 plot(s18_mod, conf.int = T, col = c(1, 2))
 
 
+mod_out <- data.table(rbind(
+  data.frame(time = s17_mod$time, surv = s17_mod$surv, lower = s17_mod$lower,
+             upper = s17_mod$upper,
+             cluster = rep(gsub('.*=', '', names(s17_mod$strata)),
+                           times = c(s17_mod$strata[1], s17_mod$strata[2])),
+             year = '2017'),
+  data.frame(time = s18_mod$time, surv = s18_mod$surv, lower = s18_mod$lower,
+             upper = s18_mod$upper,
+             cluster = rep(gsub('.*=', '', names(s18_mod$strata)),
+                           times = c(s18_mod$strata[1], s18_mod$strata[2])),
+             year = '2018'),
+  data.frame(time = rep(0, 4),
+             surv = rep(1, 4),
+             lower = rep(1, 4),
+             upper = rep(1, 4),
+             cluster = rep(c('Lower', 'Upper'), each = 2),
+             year = rep(c('2017', '2018'), times = 2))
+  ))
 
+setorder(mod_out, cluster, year, time)
+mod_out[, date := as.Date('2017-05-01') + time]
+mod_out[, stdate := shift(date, type = 'lead'), by = c('cluster', 'year')]
+
+
+fig8 <- ggplot(data = mod_out, aes(x = date)) +
+  geom_rect(aes(xmin = stdate, xmax = date,
+                ymin = lower, ymax = upper,
+                fill = cluster),
+            alpha = 0.5)+
+  scale_fill_manual(values = c('#7DC6D8', '#FF7762')) +
+  geom_step(aes(y = surv, color = cluster), size = 1) +
+  scale_color_manual(values = c('#4A93A5','#EE442F')) +
+  guides(fill = guide_legend(reverse = T), color = guide_legend(reverse = T)) +
+  geom_label(data = data.frame(year = c('2017', '2018'),
+                              x = rep(as.Date('2017-05-01'), 2),
+                              y = c(0.85, 0.85)),
+            aes(x = x, y = y, label = year),
+            size = 12 / .pt, label.size = 0, label.padding = unit(0.1, 'mm')) +
+  labs(x = NULL, y = 'Survival probability',
+       color = '2017 Spawning region', fill = '2017 Spawning region') +
+  ylim(0, 1) +
+  scale_x_date(date_breaks = 'month', date_labels = '%b') +
+  facet_wrap(~ year, ncol = 1) +
+  theme_bw() +
+  theme(strip.background = element_blank(),
+        strip.text = element_blank(),
+        axis.text.y = element_text(size = 8),
+        axis.title.y = element_text(size = 12),
+        panel.grid.minor = element_blank(),
+        legend.position = c(0.2, 0.1),
+        plot.margin = unit(c(0, 0.2, 0.1, 0.05), "cm"),
+        panel.spacing.x = unit(0.7, 'lines'))
+# fig8
+
+ggsave("manuscript/figures/submitted/Figure8.tif", fig8,
+       width = 5.2, height = 5.2, units = 'in',
+       device = 'tiff', compression = 'lzw')
 
