@@ -158,5 +158,67 @@ fwrite(data, 'manuscript/submission/data/coastal_migration.csv')
 
 
 
+## Cumulative frequency ----
+library(data.table)
+
+# Water quality data
+usgs_data <- data.table(readRDS("data and imports/usgs_wq.rds"))
+
+usgs_data <- usgs_data[, date := as.Date(datetime)]
+usgs_data <- usgs_data[, year := year(date)]
+
+usgs_data <- usgs_data[grepl('pough', site_name) & month(date) %in% 3:7]
 
 
+# Detection data
+dets <- data.table(readRDS('data and imports/hud_detects.RDS'))
+dets <- dets[grepl('Above|Saug|Between|Newb|Below', array) &
+               as.Date(date.floor) %between% c('2017-01-01', '2018-12-31') &
+               month(date.local) %in% 3:7]
+dets <- dets[, ':='(transmitter = sub('.*-', '', transmitter),
+                    year = year(date.local))]
+
+
+# Remove 11424 in 2018, as it's likely false
+dets <- dets[!(grepl('11424', transmitter) & year == 2018)]
+
+
+# Recategorization data
+recat <- fread('manuscript/recategorized.csv')
+recat <- recat[, .(transmitter = sub('.*-' ,'', transmitter),
+                   categorized_2017 = tolower(cluster17),
+                   predicted_2018 = tolower(pred18))]
+
+
+# Join detection and recategorization
+dets <- dets[recat[!is.na(categorized_2017)], on = 'transmitter']
+
+
+# Find date of first entry
+dets <- dets[, .(entry = min(date.local)),
+             by = c('transmitter', 'year', 'categorized_2017')]
+setorder(dets, categorized_2017, entry)
+
+
+# Apply ECDF by year and 2017 cluster
+cum_frac <- dets[, lapply(.SD, ecdf(entry)), by = c('year', 'categorized_2017')]
+
+
+# Bind back in
+cum_frac <- cbind(dets[, .(year, categorized_2017, entry, date = as.Date(entry))],
+                  cum_frac[, .(cumulative_fraction = entry)])
+
+
+# Join water quality data
+data <- usgs_data[, .(water_temperature_c = mwt,
+                      discharge_m3_s = mdisch,
+                      date)][cum_frac, on = 'date']
+
+
+# Prep for export
+data <- data[, .(categorized_2017, year, entry_datetime = entry, cumulative_fraction,
+                 water_temperature_c, discharge_m3_s)]
+
+
+# Export
+fwrite(data, 'manuscript/submission/data/hudson_spawning_entry.csv')
