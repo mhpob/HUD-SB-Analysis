@@ -32,9 +32,9 @@ library(ggplot2)
 egg_density <- ggplot(data = eggs,
                       aes(x = fdensity, y = latitude, group = region)) +
   annotate('rect', xmin = 0, xmax = 0.75,
-           ymin = 42.07, ymax = 42.36, fill = '#FF7762', alpha = 0.7) +
+           ymin = 42.02, ymax = 42.33, fill = '#FF7762', alpha = 0.7) +
   annotate('rect', xmin = 0, xmax = 0.75,
-           ymin = 41.32, ymax = 41.52, fill = '#7DC6D8', alpha = 0.7) +
+           ymin = 41.35, ymax = 41.52, fill = '#7DC6D8', alpha = 0.7) +
   geom_boxplot(outlier.shape = 'circle open') +
   geom_point(shape = 'circle open') +
   labs(x = 'Fractional egg density', y = NULL) +
@@ -62,15 +62,15 @@ plot_points <- unique(plot_points, by = 'station')
 hudson <-
   ggplot() +
   annotate('rect', xmin = -74, xmax = -73.75,
-           ymin = 42.07, ymax = 42.36, fill = '#FF7762') +
+           ymin = 42.02, ymax = 42.33, fill = '#FF7762') +
   annotate('rect', xmin = -74.05, xmax = -73.9,
-           ymin = 41.32, ymax = 41.52, fill = '#7DC6D8') +
+           ymin = 41.35, ymax = 41.52, fill = '#7DC6D8') +
   geom_sf(data = hud_base) +
   coord_sf(xlim = c(-74.1, -73.6), ylim = c(40.59, 42.77), expand = F, clip = 'off') +
   annotate('rect', xmin = -73.95, xmax = -73.75,
-           ymin = 42.07, ymax = 42.36, color = 'black', fill = NA) +
+           ymin = 42.02, ymax = 42.33, color = 'black', fill = NA) +
   annotate('rect', xmin = -74.05, xmax = -73.9,
-           ymin = 41.32, ymax = 41.52, color = 'black', fill = NA) +
+           ymin = 41.35, ymax = 41.52, color = 'black', fill = NA) +
   geom_point(data = plot_points,
              aes(x = long, y = lat), size = 3.5, pch = 1) +
   annotate('text', x = -74.1, y = 40.73, label = 'NYC',
@@ -103,6 +103,6 @@ rkm_axis <- ggplot(data = rkm, aes(y = latitude)) +
 library(patchwork)
 fig1 <- rkm_axis + hudson + egg_density + plot_annotation(title = 'R-Km  Latitude')
 
-ggsave("manuscript/figures/submitted/Figure1.tif", fig1,
+ggsave("p:/obrien/biotelemetry/hudson sb/hud-sb-analysis/manuscript/revision/figures/Figure1.tif", fig1,
        width = 5.2, height = 5.2, units = 'in', dpi = 600,
        device = 'tiff', compression = 'lzw')
