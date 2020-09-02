@@ -90,7 +90,7 @@ agg.pos.imp <- do.call(rbind, agg.pos.imp)
 #
 # # Mean daily imputed latitude
 # # # Using a dummy DOY as work-around for month labels
-# agg.pos.imp$dummydoy <- (agg.pos.imp$doy - 1) + as.Date('2017-01-01')
+agg.pos.imp$dummydoy <- (agg.pos.imp$doy - 1) + as.Date('2017-01-01')
 # ggplot() +
 #   annotate('rect', xmin = as.Date('2017-04-01'),
 #            xmax = as.Date('2017-07-01'),

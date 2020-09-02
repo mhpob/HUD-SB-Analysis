@@ -39,9 +39,10 @@ all_clust <- full_join(tibble(transmitter = names(clust17@datalist),
          pred18 = ifelse(pred18 == 1, 'Upper', 'Lower'),
          region = ifelse(grepl('West', region), 'Lower', 'Upper'))
 
-# write.csv(all_clust, 'manuscript/recategorized.csv', row.names = F)
+# write.csv(all_clust, 'manuscript/recategorized_rkm.csv', row.names = F)
 
 # Test for categorization differences
+xtabs(~ cluster17 + region, data = all_clust)
 xtabs(~ pred18 + region, data = all_clust)
 xtabs(~ cluster17 + pred18, data = all_clust)
 chisq.test(xtabs(~ cluster17 + pred18, data = all_clust), correct = F)
@@ -99,20 +100,21 @@ cleanplot <- function(dat, highlight = NULL, highlight_only = F){
 
 
   base_plot <- ggplot(cents) +
-    facet_wrap(~cent) + ylim(40.95, 42.75) +
+    facet_wrap(~cent) +
+    scale_y_continuous(limits = c(0, 255), expand = c(0, 0)) +
     annotate('rect',
              xmin = mindate,
              xmax = maxdate,
-             ymin = 42.07, ymax = 42.36, fill = '#FF7762', alpha = 0.7) +
+             ymin = 160, ymax = 200, fill = '#FF7762', alpha = 0.7) +
     annotate('rect',
              xmin = mindate,
              xmax = maxdate,
-             ymin = 41.32, ymax = 41.52, fill = '#7DC6D8', alpha = 0.7) +
+             ymin = 80, ymax = 100, fill = '#7DC6D8', alpha = 0.7) +
     scale_x_date(breaks = 'month',
                  date_labels = '%b',
                  limits = c(as.Date('2017-04-01'), as.Date('2017-06-30')),
                  expand = c(0, 0))  +
-    labs(x = NULL, y = 'Latitude') +
+    labs(x = NULL, y = 'River kilometer') +
     theme_bw()
 
 
@@ -143,8 +145,10 @@ cleanplot <- function(dat, highlight = NULL, highlight_only = F){
 }
 
 
-p2017 <- cleanplot('r_series17') +
-  geom_text(data = data.frame(x = as.Date('2017-04-10'), y = 42.7,
+p2017 <-
+  cleanplot('r_series17') +
+  scale_y_continuous(limits = c(0, 255), expand = c(0, 0), breaks = seq(50, 250, 50)) +
+  geom_text(data = data.frame(x = as.Date('2017-04-10'), y = 240,
                               lab = '2017', cent = 'Centroid 1'),
             aes(x = x, y = y, label = lab), size = 10/.pt) +
   labs(x = NULL, y = NULL) +
@@ -157,12 +161,13 @@ p2017 <- cleanplot('r_series17') +
         panel.spacing.x = unit(1, 'lines'))
 # p2017
 
-p2018 <- cleanplot('r_series18',
-                   highlight = all_clust[all_clust$cluster17 != all_clust$pred18,]$transmitter) +
-  geom_text(data = data.frame(x = as.Date('2017-04-10'), y = 42.7,
+p2018 <-
+  cleanplot('r_series18',
+            highlight = all_clust[all_clust$cluster17 != all_clust$pred18,]$transmitter) +
+  geom_text(data = data.frame(x = as.Date('2017-04-10'), y = 240,
                               lab = '2018', cent = 'Centroid 1'),
             aes(x = x, y = y, label = lab), size = 10/.pt) +
-  labs(y = 'Latitude (°N)') +
+  labs(y = 'River kilometer') +
   theme(axis.text.y = element_text(size = 8, angle = 90, hjust = 0.5),
         axis.text.x = element_text(size = 8),
         axis.title = element_text(size = 12, hjust = 1.75),
@@ -175,9 +180,10 @@ p2018 <- cleanplot('r_series18',
 # p2018
 library(patchwork)
 
-fig4 <- p2017 / p2018
+fig4 <- p2017 / p2018 &
+  theme(plot.margin = margin(0, 0, 0, 0))
 
 
-ggsave("manuscript/figures/submitted/Figure4.tif", fig4,
+ggsave("p:/obrien/biotelemetry/hudson sb/hud-sb-analysis/manuscript/revision/figures/Figure4.tif", fig4,
        width = 5.2, height = 4, units = 'in', dpi = 600,
        device = 'tiff', compression = 'lzw')
