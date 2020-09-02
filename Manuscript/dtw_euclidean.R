@@ -46,12 +46,12 @@ dtw_euc_plot <- function (d, xts = NULL, yts = NULL, offset = 1, ts.type = "l",
 
   plot_body <- function(){
     matlines(cbind(xts, ytso), type = ts.type, pch = pch, xlab = xlab,
-            ylab = '', ylim = c(min(xts), max(ytso) + 0.1), ...)
+            ylab = '', ylim = c(min(xts), max(ytso) + 10), ...)
     box()
-    axis(2, at = round(c(min(xts), mean(c(min(xts), max(xts))), max(xts)), 1),
+    axis(2, at = round(c(min(xts), mean(c(min(xts), max(xts))), ceiling(max(xts)))),
          cex.axis = 1.25, tcl = -0.25, mgp = c(3 ,0.5, 0))
-    axis(4, at = round(c(min(xts), mean(c(min(xts), max(xts))), max(xts)), 1) + offset,
-         labels = round(c(min(xts), mean(c(min(xts), max(xts))), max(xts)), 1),
+    axis(4, at = round(c(min(xts), mean(c(min(xts), max(xts))), ceiling(max(xts)))) + offset,
+         labels = round(c(min(xts), mean(c(min(xts), max(xts))), ceiling(max(xts)))),
          cex.axis = 1.25, tcl = -0.25, mgp = c(3 ,0.5, 0))
   }
 
@@ -86,7 +86,7 @@ dtw_euc_plot <- function (d, xts = NULL, yts = NULL, offset = 1, ts.type = "l",
 
 
   matplot(cbind(xts, ytso), pch = pch, xlab = xlab, type = 'n',
-           ylab = '', ylim = c(min(xts), max(ytso) + 0.1), axes = FALSE, ...)
+           ylab = '', ylim = c(min(xts), max(ytso) + 15), axes = FALSE, ...)
 
   plot_segments(type = 'dtw')
 
@@ -97,7 +97,7 @@ dtw_euc_plot <- function (d, xts = NULL, yts = NULL, offset = 1, ts.type = "l",
 
 
   matplot(cbind(xts, ytso), pch = pch, xlab = xlab, type = 'n',
-          ylab = '', ylim = c(min(xts), max(ytso) + 0.1), axes = FALSE, ...)
+          ylab = '', ylim = c(min(xts), max(ytso) + 15), axes = FALSE, ...)
 
   plot_segments(type = 'Euclid')
 
@@ -110,7 +110,7 @@ dtw_euc_plot <- function (d, xts = NULL, yts = NULL, offset = 1, ts.type = "l",
          '%d-%b'))
 
 
-  mtext('Latitude (°N)', side = 2, line = -2, outer = T, cex = 1.75)
+  mtext('River kilometer', side = 2, line = -2, outer = T, cex = 1.75)
 
 
   par(def.par)
@@ -119,8 +119,8 @@ dtw_euc_plot <- function (d, xts = NULL, yts = NULL, offset = 1, ts.type = "l",
 
 
 ## Plot! ----
-tiff("manuscript/figures/submitted/Figure2.tif",
+tiff("p:/obrien/biotelemetry/hudson sb/hud-sb-analysis/manuscript/revision/figures/Figure2.tif",
      width = 5.2, height = 3.75, units = 'in', compression = 'lzw', res = 600,
      pointsize = 6)
-dtw_euc_plot(warp, col = c('burlywood', 'burlywood4'), lty = 1, lwd = 3)
+dtw_euc_plot(warp, col = c('burlywood', 'burlywood4'), offset = 175, lty = 1, lwd = 3)
 dev.off()
