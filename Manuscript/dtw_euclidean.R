@@ -88,26 +88,45 @@ dtw_euc_plot <- function (d, xts = NULL, yts = NULL, offset = 1, ts.type = "l",
   matplot(cbind(xts, ytso), pch = pch, xlab = xlab, type = 'n',
            ylab = '', ylim = c(min(xts), max(ytso) + 15), axes = FALSE, ...)
 
-  plot_segments(type = 'dtw')
+  plot_segments(type = 'Euclid')
 
   plot_body()
 
-  title(main = 'Dynamic time warping', adj = 0.01, line = -1)
+  title(main = 'Euclidean', adj = 0.01, line = -1)
   axis(1, cex.axis = 1.25, at = seq(1, 88, 14), labels = F, tcl = 0.25)
 
 
   matplot(cbind(xts, ytso), pch = pch, xlab = xlab, type = 'n',
           ylab = '', ylim = c(min(xts), max(ytso) + 15), axes = FALSE, ...)
 
-  plot_segments(type = 'Euclid')
+  plot_segments(type = 'dtw')
+
 
   plot_body()
 
-  title(main = 'Euclidean', adj = 0.01, line = -1)
+  title(main = 'Dynamic time warping', adj = 0.01, line = -1)
   axis(1, cex.axis = 1.25, at = seq(1, 88, 14),
        labels = format(
          seq.Date(as.Date('2019-04-02'), as.Date('2019-04-01') + 88, by = '14 day'),
          '%d-%b'))
+
+
+  segments(28, xts[28],
+           1, ytso[1], col = 'red')
+  segments(34, xts[34],
+           9, ytso[9], col = 'red')
+  segments(75, xts[75],
+           54, ytso[54], col = 'red')
+  segments(86, xts[86],
+           58, ytso[58], col = 'red')
+
+  # These are segments connecting points of entry, arrival on spawning ground,
+  # departure from spawning ground, and departure from river. Not done functionally,
+  # here.
+  text(30, 35, 'A')
+  text(35, 170, 'B')
+  text(55, 340, 'C')
+  text(84, 35, 'D')
 
 
   mtext('River kilometer', side = 2, line = -2, outer = T, cex = 1.75)
@@ -123,4 +142,5 @@ tiff("p:/obrien/biotelemetry/hudson sb/hud-sb-analysis/manuscript/revision/figur
      width = 5.2, height = 3.75, units = 'in', compression = 'lzw', res = 600,
      pointsize = 6)
 dtw_euc_plot(warp, col = c('burlywood', 'burlywood4'), offset = 175, lty = 1, lwd = 3)
+
 dev.off()
