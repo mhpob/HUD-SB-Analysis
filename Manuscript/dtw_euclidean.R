@@ -95,6 +95,29 @@ dtw_euc_plot <- function (d, xts = NULL, yts = NULL, offset = 1, ts.type = "l",
   title(main = 'Euclidean', adj = 0.01, line = -1)
   axis(1, cex.axis = 1.25, at = seq(1, 88, 14), labels = F, tcl = 0.25)
 
+  segments(c(28, 1), c(xts[28], ytso[1]),
+           c(28, 1), c(ytso[28], xts[1]), col = 'red')
+  points(x = c(28, 1), y = c(xts[28], ytso[1]), col = 'red')
+  segments(c(34, 9), c(xts[34], ytso[9]),
+           c(34, 9), c(ytso[34], xts[9]), col = 'red')
+  points(x = c(34, 9), y = c(xts[34], ytso[9]), col = 'red')
+  segments(c(75, 54), c(xts[75], ytso[54]),
+           c(75, 54), c(ytso[75], xts[54]), col = 'red')
+  points(x = c(75, 54), y = c(xts[75], ytso[54]), col = 'red')
+  segments(c(86, 58), c(xts[86], ytso[58]),
+           c(86, 58), c(ytso[86], xts[58]), col = 'red')
+  points(x = c(86, 58), y = c(xts[86], ytso[58]), col = 'red')
+
+
+  text(-1, 210, expression('A'[1]))
+  text(31, 34, expression('A'[2]))
+  text(7, 363, expression('B'[1]))
+  text(36, 168, expression('B'[2]))
+  text(55, 340, expression('C'[1]))
+  text(75, 112, expression('C'[2]))
+  text(59, 230, expression('D'[1]))
+  text(84, 35, expression('D'[2]))
+
 
   matplot(cbind(xts, ytso), pch = pch, xlab = xlab, type = 'n',
           ylab = '', ylim = c(min(xts), max(ytso) + 15), axes = FALSE, ...)
@@ -111,22 +134,30 @@ dtw_euc_plot <- function (d, xts = NULL, yts = NULL, offset = 1, ts.type = "l",
          '%d-%b'))
 
 
-  segments(28, xts[28],
-           1, ytso[1], col = 'red')
-  segments(34, xts[34],
-           9, ytso[9], col = 'red')
-  segments(75, xts[75],
-           54, ytso[54], col = 'red')
-  segments(86, xts[86],
-           58, ytso[58], col = 'red')
-
   # These are segments connecting points of entry, arrival on spawning ground,
   # departure from spawning ground, and departure from river. Not done functionally,
   # here.
-  text(30, 35, 'A')
-  text(35, 170, 'B')
-  text(55, 340, 'C')
-  text(84, 35, 'D')
+  segments(28, xts[28],
+           1, ytso[1], col = 'red')
+  points(x = c(28, 1), y = c(xts[28], ytso[1]), col = 'red')
+  segments(34, xts[34],
+           9, ytso[9], col = 'red')
+  points(x = c(34, 9), y = c(xts[34], ytso[9]), col = 'red')
+  segments(75, xts[75],
+           54, ytso[54], col = 'red')
+  points(x = c(75, 54), y = c(xts[75], ytso[54]), col = 'red')
+  segments(86, xts[86],
+           58, ytso[58], col = 'red')
+  points(x = c(86, 58), y = c(xts[86], ytso[58]), col = 'red')
+
+  text(-1, 210, expression('A'[1]))
+  text(31, 34, expression('A'[2]))
+  text(7, 363, expression('B'[1]))
+  text(36, 168, expression('B'[2]))
+  text(55, 340, expression('C'[1]))
+  text(76, 150, expression('C'[2]))
+  text(57, 190, expression('D'[1]))
+  text(84, 35, expression('D'[2]))
 
 
   mtext('River kilometer', side = 2, line = -2, outer = T, cex = 1.75)
