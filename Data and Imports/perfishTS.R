@@ -51,6 +51,7 @@ agg.pos <- hud %>%
 
 # No padding ----
 # When the fish isn't heard on a day between first and last days detected,
+
 # insert a day with NA location. Fill this with imputed value.
 agg.pos.spl <- split(agg.pos, agg.pos$transmitter)
 agg.pos.spl <- lapply(agg.pos.spl, function(x) split(x, x$year))
@@ -75,6 +76,26 @@ agg.pos.spl <- lapply(agg.pos.spl, function(y){
 
 agg.pos.imp <- lapply(agg.pos.spl, function(x) do.call(rbind, x))
 agg.pos.imp <- do.call(rbind, agg.pos.imp)
+
+
+# Mean/SD of number of non-imputed values
+agg.pos.imp %>%
+  filter(!is.na(rkm.avg)) %>%
+  group_by(transmitter, year) %>%
+  summarize(count = n()) %>%
+  group_by(year) %>%
+  summarize(mean(count),
+            sd(count))
+
+
+# Mean/SD of number of imputed values
+agg.pos.imp %>%
+  filter(is.na(rkm.avg)) %>%
+  group_by(transmitter, year) %>%
+  summarize(count = n()) %>%
+  group_by(year) %>%
+  summarize(mean(count),
+            sd(count))
 
 # Mean daily latitude
 # ggplot() +
